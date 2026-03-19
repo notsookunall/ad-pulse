@@ -213,6 +213,11 @@ export default function Landing() {
           </Link>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-8 mt-auto border-t border-white/5 text-center text-gray-500 text-sm">
+        made by kunal prajapati
+      </footer>
     </div>
   );
 }
