@@ -9,11 +9,14 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Overview from "./pages/dashboard/Overview";
 import Campaigns from "./pages/dashboard/Campaigns";
 import Payments from "./pages/dashboard/Payments";
 import AdminOverview from "./pages/admin/AdminOverview";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Placeholder for missing pages
 const Placeholder = ({ title }: { title: string }) => (
@@ -28,38 +31,45 @@ const Placeholder = ({ title }: { title: string }) => (
 export default function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="adpulse-theme">
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Landing />} />
-            <Route path="/pricing" element={<Pricing />} />
-          </Route>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Landing />} />
+              <Route path="/pricing" element={<Pricing />} />
+            </Route>
 
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Client Dashboard Routes */}
-          <Route path="/dashboard" element={<DashboardLayout role="client" />}>
-            <Route index element={<Overview />} />
-            <Route path="campaigns" element={<Campaigns />} />
-            <Route path="payments" element={<Payments />} />
-            <Route path="analytics" element={<Placeholder title="Analytics" />} />
-            <Route path="messages" element={<Placeholder title="Messages" />} />
-            <Route path="settings" element={<Placeholder title="Settings" />} />
-          </Route>
+            {/* Client Dashboard Routes — protected, client role only */}
+            <Route element={<ProtectedRoute requiredRole="client" />}>
+              <Route path="/dashboard" element={<DashboardLayout role="client" />}>
+                <Route index element={<Overview />} />
+                <Route path="campaigns" element={<Campaigns />} />
+                <Route path="payments" element={<Payments />} />
+                <Route path="analytics" element={<Placeholder title="Analytics" />} />
+                <Route path="messages" element={<Placeholder title="Messages" />} />
+                <Route path="settings" element={<Placeholder title="Settings" />} />
+              </Route>
+            </Route>
 
-          {/* Admin Dashboard Routes */}
-          <Route path="/admin" element={<DashboardLayout role="admin" />}>
-            <Route index element={<AdminOverview />} />
-            <Route path="clients" element={<Placeholder title="Manage Clients" />} />
-            <Route path="campaigns" element={<Placeholder title="Manage Campaigns" />} />
-            <Route path="analytics" element={<Placeholder title="Update Analytics" />} />
-            <Route path="payments" element={<Placeholder title="Payment Monitoring" />} />
-            <Route path="reports" element={<Placeholder title="Reports" />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+            {/* Admin Dashboard Routes — protected, admin role only */}
+            <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route path="/admin" element={<DashboardLayout role="admin" />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="clients" element={<Placeholder title="Manage Clients" />} />
+                <Route path="campaigns" element={<Placeholder title="Manage Campaigns" />} />
+                <Route path="analytics" element={<Placeholder title="Update Analytics" />} />
+                <Route path="payments" element={<Placeholder title="Payment Monitoring" />} />
+                <Route path="reports" element={<Placeholder title="Reports" />} />
+              </Route>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

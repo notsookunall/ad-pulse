@@ -9,18 +9,18 @@ import {
   Zap,
   Megaphone,
   Bell,
-  User,
   Users,
   FileText,
   Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DashboardLayout({ role = "client" }: { role?: "client" | "admin" }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
 
   const clientLinks = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -42,8 +42,20 @@ export default function DashboardLayout({ role = "client" }: { role?: "client" |
 
   const links = role === "admin" ? adminLinks : clientLinks;
 
-  const handleLogout = () => {
-    // In a real app, clear auth state here
+  // Derive initials from real full name
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return role === "admin" ? "A" : "U";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  const displayName = profile?.full_name ?? (role === "admin" ? "Admin" : "User");
+  const displayEmail = profile?.email ?? "";
+  const initials = getInitials(profile?.full_name);
+
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
 
@@ -109,11 +121,11 @@ export default function DashboardLayout({ role = "client" }: { role?: "client" |
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-border">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-foreground">{role === 'admin' ? 'Admin User' : 'Alex Johnson'}</p>
-                <p className="text-xs text-muted-foreground">{role === 'admin' ? 'Administrator' : 'Premium Plan'}</p>
+                <p className="text-sm font-medium text-foreground">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-[160px]">{displayEmail}</p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                {role === 'admin' ? 'A' : 'AJ'}
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                {initials}
               </div>
             </div>
           </div>
