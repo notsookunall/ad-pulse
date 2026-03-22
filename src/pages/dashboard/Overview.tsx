@@ -34,16 +34,16 @@ export default function Overview() {
           { title: "Conversion Rate", value: "3.2%", icon: TrendingUp, change: "-0.4%", trend: "down" },
           { title: "ROI", value: "245%", icon: ArrowUpRight, change: "+18%", trend: "up" },
         ].map((kpi, i) => (
-          <Card key={i} className="bg-white/5 border-white/10">
+          <Card key={i} className="bg-card border-border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-gray-400">{kpi.title}</span>
+                <span className="text-sm font-medium text-muted-foreground">{kpi.title}</span>
                 <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                   <kpi.icon className="w-4 h-4 text-indigo-400" />
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">{kpi.value}</span>
+                <span className="text-2xl font-bold text-foreground">{kpi.value}</span>
                 <span className={`text-xs font-medium ${kpi.trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
                   {kpi.change}
                 </span>
@@ -55,9 +55,9 @@ export default function Overview() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-white">Performance Trend</CardTitle>
+            <CardTitle className="text-lg font-medium text-foreground">Performance Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
@@ -83,9 +83,9 @@ export default function Overview() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-white">Clicks vs Impressions</CardTitle>
+            <CardTitle className="text-lg font-medium text-foreground">Clicks vs Impressions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
@@ -108,14 +108,14 @@ export default function Overview() {
       </div>
 
       {/* Recent Activity Table */}
-      <Card className="bg-white/5 border-white/10">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-medium text-white">Recent Campaigns</CardTitle>
+          <CardTitle className="text-lg font-medium text-foreground">Recent Campaigns</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-400 uppercase border-b border-white/10">
+              <thead className="text-xs text-muted-foreground uppercase border-b border-border">
                 <tr>
                   <th className="px-6 py-3">Campaign Name</th>
                   <th className="px-6 py-3">Status</th>
@@ -123,22 +123,22 @@ export default function Overview() {
                   <th className="px-6 py-3">Last Updated</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {[
                   { name: "Summer Sale 2025", status: "Running", budget: "$5,000", date: "2 mins ago" },
                   { name: "New Product Launch", status: "Pending", budget: "$12,000", date: "1 hour ago" },
                   { name: "Retargeting Q3", status: "Completed", budget: "$3,500", date: "Yesterday" },
                   { name: "Brand Awareness", status: "Running", budget: "$8,000", date: "2 days ago" },
                 ].map((row, i) => (
-                  <tr key={i} className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium text-white">{row.name}</td>
+                  <tr key={i} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-foreground">{row.name}</td>
                     <td className="px-6 py-4">
                       <Badge variant={row.status === 'Running' ? 'success' : row.status === 'Pending' ? 'warning' : 'secondary'}>
                         {row.status}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-gray-300">{row.budget}</td>
-                    <td className="px-6 py-4 text-gray-400">{row.date}</td>
+                    <td className="px-6 py-4 text-foreground">{row.budget}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{row.date}</td>
                   </tr>
                 ))}
               </tbody>
