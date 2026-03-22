@@ -155,7 +155,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Automatically sign in the user after successful sign up
+    const { error: signInError } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    });
+
     setLoading(false);
+
+    if (signInError) {
+      return { error: signInError.message };
+    }
+
     return { error: null };
   };
 

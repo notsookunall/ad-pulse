@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, signIn } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,10 +32,18 @@ export default function Signup() {
 
     setIsLoading(true);
     const { error: signUpError } = await signUp(email, password, fullName);
+    if (signUpError) {
+      setIsLoading(false);
+      setError(signUpError);
+      return;
+    }
+
+    // Immediately call signIn to log the user in explicitly
+    const { error: signInError } = await signIn(email, password);
     setIsLoading(false);
 
-    if (signUpError) {
-      setError(signUpError);
+    if (signInError) {
+      setError(signInError);
       return;
     }
 
