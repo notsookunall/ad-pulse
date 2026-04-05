@@ -28,7 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   // Fetch the profile row from the `profiles` table.
-  // If RLS causes an error (e.g. infinite recursion), fall back to auth metadata.
+  // If no row exists (e.g. first login after signup), auto-create it.
+  // If RLS causes an error, fall back to auth metadata so the app still works.
   const fetchProfile = async (userId: string, authUser?: User): Promise<Profile | null> => {
     const { data, error } = await supabase
       .from("profiles")
@@ -36,31 +37,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("id", userId)
       .single();
 
-    if (error) {
-      console.error(
-        "Error fetching profile (check Supabase RLS policies):",
-        error.message
-      );
-      // Fallback: build a partial profile from auth metadata so the app still works
-      if (authUser) {
-        const meta = authUser.user_metadata as Record<string, string> | undefined;
-        const email = authUser.email ?? "";
-        const full_name = meta?.full_name ?? email.split("@")[0] ?? "User";
-        const role: "admin" | "client" = email === "admin@adpulse.ai" ? "admin" : "client";
-        return {
-          id: userId,
-          email,
-          full_name,
-          role,
-          company: null,
-          avatar_url: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        } satisfies Profile;
-      }
-      return null;
+    if (!error && data) {
+      return data as Profile;
     }
-    return data as Profile;
+
+    // PGRST116 = no rows found — profile missing, auto-create it
+    if (error?.code === "PGRST116" && authUser) {
+      const meta = authUser.user_metadata as Record<string, string> | undefined;
+      const email = authUser.email ?? "";
+      const full_name = meta?.full_name ?? email.split("@")[0] ?? "User";
+      const role: "admin" | "client" = email === "admin@adpulse.ai" ? "admin" : "client";
+      const now = new Date().toISOString();
+
+      const newProfile: Profile = {
+        id: userId,
+        email,
+        full_name,
+        role,
+        company: null,
+        avatar_url: null,
+        created_at: now,
+        updated_at: now,
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: insertError } = await (supabase.from("profiles") as any).upsert(newProfile);
+      if (insertError) {
+        console.error("Failed to auto-create profile:", insertError.message);
+      }
+      return newProfile;
+    }
+
+    // Any other error — fall back to in-memory profile so login doesn't spin
+    if (authUser) {
+      const meta = authUser.user_metadata as Record<string, string> | undefined;
+      const email = authUser.email ?? "";
+      const full_name = meta?.full_name ?? email.split("@")[0] ?? "User";
+      const role: "admin" | "client" = email === "admin@adpulse.ai" ? "admin" : "client";
+      console.error("Falling back to in-memory profile. Supabase error:", error?.message);
+      return {
+        id: userId,
+        email,
+        full_name,
+        role,
+        company: null,
+        avatar_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } satisfies Profile;
+    }
+
+    return null;
   };
 
   // Bootstrap session on mount + subscribe to auth changes
@@ -140,18 +167,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: error.message };
     }
 
-    // Insert profile row (role defaults to 'client')
+    // Always insert/upsert the profile row immediately after signup
     if (data.user) {
+      const now = new Date().toISOString();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: profileError } = await (supabase.from("profiles") as any).upsert({
         id: data.user.id,
         email,
         full_name: fullName,
         role: "client",
+        created_at: now,
+        updated_at: now,
       });
 
       if (profileError) {
-        console.error("Error creating profile:", profileError.message);
+        console.error("Error creating profile row on signup:", profileError.message);
+      } else {
+        console.log("Profile row created successfully for:", email);
       }
     }
 
