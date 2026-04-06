@@ -135,9 +135,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ─── Auth Actions ──────────────────────────────────────────────────────────
 
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
-    setLoading(true);
+    // Do NOT call setLoading here — onAuthStateChange already manages loading
+    // Calling setLoading(false) here races against the async fetchProfile in onAuthStateChange
+    // and causes the ProtectedRoute spinner to lock up indefinitely.
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     if (error) return { error: error.message };
     return { error: null };
   };
