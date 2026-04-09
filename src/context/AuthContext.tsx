@@ -31,11 +31,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // If no row exists (e.g. first login after signup), auto-create it.
   // If RLS causes an error, fall back to auth metadata so the app still works.
   const fetchProfile = async (userId: string, authUser?: User): Promise<Profile | null> => {
-    const { data, error } = await supabase
+    // Implement a 5-second timeout to prevent infinite UI spins if Supabase RLS causes infinite loops
+    const fetchPromise = supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .single();
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Supabase query timed out (likely an RLS infinite recursion issue).")), 5000);
+    });
+
+    let data, error;
+    try {
+      const res = await Promise.race([fetchPromise, timeoutPromise]) as any;
+      data = res.data;
+      error = res.error;
+    } catch (e: any) {
+      error = { message: e.message || "Unknown timeout error" };
+    }
 
     if (!error && data) {
       return data as Profile;
