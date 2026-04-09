@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, BarChart3, Globe, Layers, ShieldCheck, Zap, Sparkles, LineChart, Target, Bot } from "lucide-react";
+import { BarChart3, Globe, Layers, ShieldCheck, Zap, LineChart, Target, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { AnimatedHero } from "@/components/ui/animated-hero";
 
 export default function Landing() {
   return (
@@ -23,53 +24,7 @@ export default function Landing() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="flex flex-col items-center"
-          >
-            {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] shadow-[0_0_20px_rgba(99,102,241,0.1)] mb-8 backdrop-blur-md">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
-              <span className="text-sm font-medium text-slate-300">Introducing AdPulse AI 2.0</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-medium tracking-tight text-white mb-8 max-w-5xl mx-auto leading-[1.1]">
-              Scale your ads with <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 animate-gradient-x">
-                Mathematical Precision
-              </span>
-            </h1>
-
-            {/* Subheadline */}
-            <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Ditch the spreadsheets. Fully automate cross-platform ad campaigns, centralize client budgets, and track real-time ROAs through a stunning unified portal.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-              <Link to="/pricing">
-                <Button 
-                  size="lg" 
-                  className="w-full sm:w-auto h-14 px-8 bg-white text-black hover:bg-slate-200 transition-all text-base font-semibold shadow-[0_0_40px_rgba(255,255,255,0.1)] group rounded-full"
-                >
-                  Start Building Now
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link to="/about">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="w-full sm:w-auto h-14 px-8 border-white/10 text-white hover:bg-white/5 transition-all text-base font-medium rounded-full bg-black/20 backdrop-blur-md"
-                >
-                  Read Whitepaper
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
+          <AnimatedHero />
           
           {/* Dashboard Preview Abstract - The WOW Factor */}
           <motion.div 
