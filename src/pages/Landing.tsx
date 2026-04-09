@@ -92,47 +92,61 @@ export default function Landing() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-24 bg-muted/50">
+      <section id="about" className="py-24 bg-muted/50 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">Why Choose AdPulse AI?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              We combine cutting-edge AI technology with expert marketing strategies to deliver unparalleled results for your business.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Zap,
-                title: "Automation",
-                desc: "Set your campaigns on autopilot. Our AI optimizes bids, targets, and creatives 24/7."
-              },
-              {
-                icon: ShieldCheck,
-                title: "Transparency",
-                desc: "No hidden fees or black-box metrics. See exactly where every dollar of your budget goes."
-              },
-              {
-                icon: BarChart3,
-                title: "AI Insights",
-                desc: "Get predictive analytics and actionable recommendations to stay ahead of the competition."
-              }
-            ].map((feature, i) => (
-              <Card key={i} className="bg-card border-border hover:bg-muted/50 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-indigo-500/20 flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-indigo-400" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-400 mb-6">
+                Project Overview
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
+                AI-Powered Digital Advertising Management System
+              </h2>
+              <div className="space-y-6 text-muted-foreground leading-relaxed">
+                <p>
+                  <strong className="text-foreground">AdPulse AI</strong> is a comprehensive digital advertising management system engineered to bridge the gap between advertising agencies and their clients through an intuitive, real-time <strong className="text-indigo-400">Client Dashboard</strong>.
+                </p>
+                <p>
+                  Managing cross-platform ad campaigns (Google Ads, Facebook, LinkedIn, etc.) traditionally requires complex spreadsheets, delayed manual reporting, and little transparency. AdPulse AI solves this by centralizing campaign creation, budget tracking, and real-time performance analytics into a single unified platform.
+                </p>
+                <p>
+                  For <strong>clients</strong>, it offers unprecedented transparency: monitor active campaigns, track daily spend, view click-through rates (CTR), and track custom conversions live. For <strong>administrators</strong>, it provides powerful tools to oversee hundreds of client campaigns, seamlessly manage budgets, and securely track financial payments globally.
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[
+                {
+                  icon: Layers,
+                  title: "Unified Management",
+                  desc: "Control campaigns across major platforms like Google, Facebook, and LinkedIn from one application."
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Client Transparency",
+                  desc: "Dedicated secure portals for clients to securely view exact ROI, impressions, and budget utilization."
+                },
+                {
+                  icon: Zap,
+                  title: "Real-Time Tech",
+                  desc: "Powered by Supabase and React for instantaneous data synchronization and rapid UI updates."
+                },
+                {
+                  icon: Globe,
+                  title: "Secure Operations",
+                  desc: "Role-Based Access Control (RBAC) mathematically ensures clients only see their own proprietary data."
+                }
+              ].map((feature, i) => (
+                <div key={i} className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4">
+                    <feature.icon className="w-5 h-5 text-indigo-400" />
                   </div>
-                  <CardTitle className="text-xl text-foreground">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {feature.desc}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+                  <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
