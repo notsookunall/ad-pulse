@@ -91,65 +91,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-24 bg-muted/50 border-y border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-400 mb-6">
-                Project Overview
-              </div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
-                AI-Powered Digital Advertising Management System
-              </h2>
-              <div className="space-y-6 text-muted-foreground leading-relaxed">
-                <p>
-                  <strong className="text-foreground">AdPulse AI</strong> is a comprehensive digital advertising management system engineered to bridge the gap between advertising agencies and their clients through an intuitive, real-time <strong className="text-indigo-400">Client Dashboard</strong>.
-                </p>
-                <p>
-                  Managing cross-platform ad campaigns (Google Ads, Facebook, LinkedIn, etc.) traditionally requires complex spreadsheets, delayed manual reporting, and little transparency. AdPulse AI solves this by centralizing campaign creation, budget tracking, and real-time performance analytics into a single unified platform.
-                </p>
-                <p>
-                  For <strong>clients</strong>, it offers unprecedented transparency: monitor active campaigns, track daily spend, view click-through rates (CTR), and track custom conversions live. For <strong>administrators</strong>, it provides powerful tools to oversee hundreds of client campaigns, seamlessly manage budgets, and securely track financial payments globally.
-                </p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[
-                {
-                  icon: Layers,
-                  title: "Unified Management",
-                  desc: "Control campaigns across major platforms like Google, Facebook, and LinkedIn from one application."
-                },
-                {
-                  icon: ShieldCheck,
-                  title: "Client Transparency",
-                  desc: "Dedicated secure portals for clients to securely view exact ROI, impressions, and budget utilization."
-                },
-                {
-                  icon: Zap,
-                  title: "Real-Time Tech",
-                  desc: "Powered by Supabase and React for instantaneous data synchronization and rapid UI updates."
-                },
-                {
-                  icon: Globe,
-                  title: "Secure Operations",
-                  desc: "Role-Based Access Control (RBAC) mathematically ensures clients only see their own proprietary data."
-                }
-              ].map((feature, i) => (
-                <div key={i} className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4">
-                    <feature.icon className="w-5 h-5 text-indigo-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Services Section */}
       <section id="services" className="py-24 relative">

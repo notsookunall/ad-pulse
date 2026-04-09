@@ -13,7 +13,7 @@ export default function MainLayout() {
     { name: "Features", href: "/#features" },
     { name: "Services", href: "/#services" },
     { name: "Pricing", href: "/pricing" },
-    { name: "About", href: "/#about" },
+    { name: "About", href: "/about" },
   ];
 
   return (

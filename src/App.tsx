@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Landing from "./pages/Landing";
+import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -37,6 +38,7 @@ export default function App() {
             {/* Public Routes */}
             <Route element={<MainLayout />}>
               <Route path="/" element={<Landing />} />
+              <Route path="/about" element={<About />} />
               <Route path="/pricing" element={<Pricing />} />
             </Route>
 
