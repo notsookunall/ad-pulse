@@ -135,11 +135,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ─── Auth Actions ──────────────────────────────────────────────────────────
 
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
-    // Do NOT call setLoading here — onAuthStateChange already manages loading
-    // Calling setLoading(false) here races against the async fetchProfile in onAuthStateChange
-    // and causes the ProtectedRoute spinner to lock up indefinitely.
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: error.message };
+
+    // Eagerly update context state from the returned session data.
+    // This is critical — without this, ProtectedRoute sees user=null when
+    // navigate() is called and bounces the user back to /login before
+    // onAuthStateChange has a chance to fire.
+    if (data.user && data.session) {
+      setUser(data.user);
+      setSession(data.session);
+      setLoading(true); // onAuthStateChange will set this to false after profile fetch
+      const prof = await fetchProfile(data.user.id, data.user);
+      setProfile(prof);
+      setLoading(false);
+    }
+
     return { error: null };
   };
 

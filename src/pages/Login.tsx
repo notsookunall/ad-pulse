@@ -33,6 +33,9 @@ export default function Login() {
     // and use the updated profile set by context. Since context updates asynchronously
     // we navigate based on email as a fallback until onAuthStateChange fires.
     // The ProtectedRoute will enforce the correct role regardless.
+    // Clear spinner before navigating
+    setIsLoading(false);
+
     if (email === "admin@adpulse.ai") {
       navigate("/admin");
     } else {
