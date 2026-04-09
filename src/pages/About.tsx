@@ -1,4 +1,4 @@
-import { Bot, LineChart, ShieldCheck, Zap, Globe, Users, Target, Rocket } from "lucide-react";
+import { Bot, LineChart, ShieldCheck, Zap, Globe, Users, Target, Rocket, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 
@@ -19,9 +19,21 @@ export default function About() {
           <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-foreground mb-6">
             About <span className="text-gradient">AdPulse AI</span>
           </h1>
-          <p className="text-xl text-muted-foreground leading-relaxed">
+          <p className="text-xl text-muted-foreground leading-relaxed mb-8">
             An advanced AI-Powered Digital Advertising Management System with a dedicated Client Dashboard, designed to revolutionize transparency and efficiency in digital marketing.
           </p>
+          <div className="flex justify-center">
+            <a 
+              href="https://docs.google.com/document/d/1eCFVudcFL9r9m9viLJsv28kBb54zxWyz/edit?usp=sharing&ouid=113583490983605706815&rtpof=true&sd=true" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button variant="gradient" className="gap-2 shadow-indigo-500/25 shadow-lg px-8">
+                <FileText className="w-4 h-4" /> 
+                Click here to download Project Report
+              </Button>
+            </a>
+          </div>
         </div>
       </section>
 
