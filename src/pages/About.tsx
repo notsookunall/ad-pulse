@@ -1,4 +1,4 @@
-import { Bot, LineChart, ShieldCheck, Zap, Globe, Users, Target, Rocket, FileText } from "lucide-react";
+import { Bot, LineChart, ShieldCheck, Zap, Globe, Users, Target, Rocket, FileText, Presentation } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 
@@ -22,15 +22,27 @@ export default function About() {
           <p className="text-xl text-muted-foreground leading-relaxed mb-8">
             An advanced AI-Powered Digital Advertising Management System with a dedicated Client Dashboard, designed to revolutionize transparency and efficiency in digital marketing.
           </p>
-          <div className="flex justify-center">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a 
               href="https://docs.google.com/document/d/1eCFVudcFL9r9m9viLJsv28kBb54zxWyz/edit?usp=sharing&ouid=113583490983605706815&rtpof=true&sd=true" 
               target="_blank" 
               rel="noopener noreferrer"
+              className="w-full sm:w-auto"
             >
-              <Button variant="gradient" className="gap-2 shadow-indigo-500/25 shadow-lg px-8">
+              <Button variant="gradient" className="w-full gap-2 shadow-indigo-500/25 shadow-lg px-8">
                 <FileText className="w-4 h-4" /> 
                 Click here to download Project Report
+              </Button>
+            </a>
+            <a 
+              href="https://docs.google.com/presentation/d/1z3UTPLc4m4ub4Vc6OaD26b8x38nNRGwa/edit?usp=sharing&ouid=113583490983605706815&rtpof=true&sd=true" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button variant="outline" className="w-full gap-2 px-8 border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-200">
+                <Presentation className="w-4 h-4" /> 
+                Click here for PPT
               </Button>
             </a>
           </div>
