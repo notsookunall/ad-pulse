@@ -35,10 +35,24 @@ function AnimatedHero() {
       transition={{ duration: 0.7, ease: "easeOut" }}
       className="flex flex-col items-center"
     >
-      {/* Pill Badge */}
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] shadow-[0_0_20px_rgba(99,102,241,0.1)] mb-8 backdrop-blur-md">
-        <Sparkles className="w-4 h-4 text-indigo-400" />
-        <span className="text-sm font-medium text-slate-300">Introducing AdPulse AI 2.0</span>
+      {/* Project Details */}
+      <div className="flex flex-col items-center justify-center mb-10 text-center glass-card px-8 py-4 rounded-2xl border border-white/5 bg-white/[0.01]">
+        <div className="text-indigo-400 text-xs md:text-sm font-semibold tracking-widest uppercase mb-3">
+          BCA Final Year Project — Session 2025-26
+        </div>
+        <div className="text-white text-base md:text-lg font-medium mb-3 flex items-center flex-wrap justify-center gap-2">
+          Kunal Prajapati
+          <span className="text-slate-600 font-bold mx-1">•</span> 
+          Saurabh Thakur
+          <span className="text-slate-600 font-bold mx-1">•</span> 
+          Kapil
+        </div>
+        <div className="text-slate-400 text-sm">
+          Under the guidance of <span className="text-slate-300">Dr. Amit Chaudhary</span>
+        </div>
+        <div className="text-slate-500 text-xs mt-1">
+          Galgotias University, Greater Noida
+        </div>
       </div>
 
       {/* Main Headline */}
