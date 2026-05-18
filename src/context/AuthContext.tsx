@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { Profile } from "@/lib/database.types";
+import { ensureDemoWorkspace } from "@/lib/demoData";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -117,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (currentSession?.user) {
         const prof = await fetchProfile(currentSession.user.id, currentSession.user);
+        await ensureDemoWorkspace(currentSession.user, prof);
         if (mounted) setProfile(prof);
       }
       setLoading(false);
@@ -132,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (newSession?.user) {
           const prof = await fetchProfile(newSession.user.id, newSession.user);
+          await ensureDemoWorkspace(newSession.user, prof);
           if (mounted) setProfile(prof);
         } else {
           setProfile(null);
@@ -161,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       setLoading(true); // onAuthStateChange will set this to false after profile fetch
       const prof = await fetchProfile(data.user.id, data.user);
+      await ensureDemoWorkspace(data.user, prof);
       setProfile(prof);
       setLoading(false);
     }

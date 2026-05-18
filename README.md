@@ -30,3 +30,4 @@ The client dashboard includes an `AI Campaign Insights` card that:
 - Calculates campaign metrics like CTR, conversion rate, budget utilization, and performance score
 - Sends those metrics to Gemini when `VITE_GEMINI_API_KEY` is configured
 - Falls back to a local recommendation engine if the Gemini key is missing
+- Auto-seeds demo campaigns and payments for brand-new client accounts so the dashboard is never empty during demos

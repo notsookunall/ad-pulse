@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Activity, DollarSign, Users, BarChart3 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import type { Database } from "@/lib/database.types";
 
 interface RecentUser {
   id: string;
@@ -17,6 +18,12 @@ interface Stats {
   activeCampaigns: number;
   totalRevenue: number;
 }
+
+type PaymentAmountRow = Pick<Database["public"]["Tables"]["payments"]["Row"], "amount">;
+type RecentProfileRow = Pick<
+  Database["public"]["Tables"]["profiles"]["Row"],
+  "id" | "full_name" | "email" | "role" | "created_at"
+>;
 
 // Format a date string as "X minutes/hours/days ago"
 function timeAgo(dateStr: string): string {
@@ -65,7 +72,7 @@ export default function AdminOverview() {
         if (revenueRes.error) throw revenueRes.error;
         if (recentRes.error) throw recentRes.error;
 
-        const totalRevenue = (revenueRes.data ?? []).reduce(
+        const totalRevenue = ((revenueRes.data ?? []) as PaymentAmountRow[]).reduce(
           (sum, row) => sum + (row.amount ?? 0),
           0
         );
@@ -78,7 +85,7 @@ export default function AdminOverview() {
 
         // Filter out admin from recent list
         setRecentUsers(
-          (recentRes.data ?? []).filter((u) => u.role !== "admin")
+          ((recentRes.data ?? []) as RecentProfileRow[]).filter((u) => u.role !== "admin")
         );
       } catch (err: unknown) {
         console.error("AdminOverview fetch error:", err);
