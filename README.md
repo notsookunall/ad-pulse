@@ -15,6 +15,18 @@ View your app in AI Studio: https://ai.studio/apps/e10341af-fef8-4a1e-bc32-bccf2
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Set the environment variables in `.env.local`:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_GEMINI_API_KEY` for the AI Insights card
 3. Run the app:
    `npm run dev`
+
+## AI Insights
+
+The client dashboard includes an `AI Campaign Insights` card that:
+
+- Loads campaign data from Supabase
+- Calculates campaign metrics like CTR, conversion rate, budget utilization, and performance score
+- Sends those metrics to Gemini when `VITE_GEMINI_API_KEY` is configured
+- Falls back to a local recommendation engine if the Gemini key is missing
