@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
   Activity,
-  AlertCircle,
   BrainCircuit,
   DollarSign,
   MousePointerClick,
@@ -150,8 +149,8 @@ export default function Overview() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Badge variant={hasGeminiApiKey() ? "success" : "warning"}>
-                  {hasGeminiApiKey() ? "Gemini enabled" : "Local fallback active"}
+                <Badge variant={hasGeminiApiKey() ? "success" : "secondary"}>
+                  {hasGeminiApiKey() ? "Gemini live" : "Built-in AI ready"}
                 </Badge>
                 {analysis && (
                   <Badge variant={healthVariant(analysis.overallHealth)}>
@@ -189,7 +188,7 @@ export default function Overview() {
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
                     <span className="font-medium text-foreground">Summary</span>
                     <Badge variant={analysis.provider === "gemini" ? "success" : "secondary"}>
-                      {analysis.provider === "gemini" ? "Powered by Gemini" : "Rules-based fallback"}
+                      {analysis.provider === "gemini" ? "Powered by Gemini" : "Built-in insight engine"}
                     </Badge>
                   </div>
                   <p className="text-sm leading-6 text-muted-foreground">{analysis.summary}</p>
@@ -217,7 +216,7 @@ export default function Overview() {
               </>
             ) : (
               <div className="rounded-xl border border-dashed border-indigo-500/25 bg-indigo-500/5 p-6 text-sm text-muted-foreground">
-                The analysis uses campaign metrics like CTR, conversion rate, budget utilization, and performance score to create tailored recommendations.
+                Generate tailored recommendations from campaign metrics like CTR, conversion rate, budget utilization, and performance score.
               </div>
             )}
           </CardContent>
@@ -399,15 +398,6 @@ export default function Overview() {
           </div>
         </CardContent>
       </Card>
-
-      {!loading && campaigns.length > 0 && !hasGeminiApiKey() && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-100">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            Gemini is not configured yet. Add <code>VITE_GEMINI_API_KEY</code> to your <code>.env.local</code> file to switch this card from local heuristics to a real AI API response.
-          </p>
-        </div>
-      )}
 
       {!loading && campaigns.length > 0 && (
         <div className="rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
