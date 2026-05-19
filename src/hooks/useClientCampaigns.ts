@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Campaign } from "@/lib/database.types";
+import { getLocalDemoCampaigns } from "@/lib/demoData";
 
 function getReadableErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -23,6 +24,7 @@ export function useClientCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingDemoData, setUsingDemoData] = useState(false);
 
   const refreshCampaigns = async () => {
     setLoading(true);
@@ -54,10 +56,13 @@ export function useClientCampaigns() {
       }
 
       setCampaigns(data ?? []);
+      setUsingDemoData(false);
     } catch (err) {
       const message = getReadableErrorMessage(err);
       console.error("Failed to load campaigns:", err);
-      setError(`Unable to load campaign data right now. ${message}`);
+      setCampaigns(getLocalDemoCampaigns());
+      setUsingDemoData(true);
+      setError(`Live campaign data was unavailable, so built-in demo campaign data is being shown. ${message}`);
     } finally {
       setLoading(false);
     }
@@ -71,6 +76,7 @@ export function useClientCampaigns() {
     campaigns,
     loading,
     error,
+    usingDemoData,
     refreshCampaigns,
   };
 }

@@ -37,7 +37,7 @@ function formatDate(dateString: string | null) {
 
 export default function Campaigns() {
   const { user } = useAuth();
-  const { campaigns, loading, error, refreshCampaigns } = useClientCampaigns();
+  const { campaigns, loading, error, usingDemoData, refreshCampaigns } = useClientCampaigns();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -143,8 +143,14 @@ export default function Campaigns() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-100">
           {error}
+        </div>
+      )}
+
+      {usingDemoData && (
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-4 text-sm text-indigo-100">
+          Demo campaign data is being shown because the live Supabase response was slow. You can still use this view for your project presentation.
         </div>
       )}
 

@@ -61,7 +61,7 @@ function SkeletonBlock({ className }: { className?: string }) {
 }
 
 export default function Overview() {
-  const { campaigns, loading, error } = useClientCampaigns();
+  const { campaigns, loading, error, usingDemoData } = useClientCampaigns();
   const [analysis, setAnalysis] = useState<CampaignAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -97,7 +97,7 @@ export default function Overview() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-100">
           {error}
         </div>
       )}
@@ -401,9 +401,16 @@ export default function Overview() {
 
       {!loading && campaigns.length > 0 && (
         <div className="rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
-          Campaign portfolio snapshot: <span className="text-foreground">{totalClicks.toLocaleString()}</span> clicks from{" "}
+          {usingDemoData ? "Demo mode snapshot: " : "Campaign portfolio snapshot: "}
+          <span className="text-foreground">{totalClicks.toLocaleString()}</span> clicks from{" "}
           <span className="text-foreground">{totalImpressions.toLocaleString()}</span> impressions with a blended conversion rate of{" "}
           <span className="text-foreground">{formatPercent(blendedConversionRate)}</span>.
+        </div>
+      )}
+
+      {!loading && usingDemoData && (
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-4 text-sm text-indigo-100">
+          The dashboard is using built-in demo campaign data right now so your presentation can continue even if the live Supabase response is slow.
         </div>
       )}
     </div>

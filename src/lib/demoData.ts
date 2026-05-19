@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import type { Database, Profile } from "@/lib/database.types";
+import type { Campaign, Database, Profile } from "@/lib/database.types";
 
 const seededUsers = new Set<string>();
 
@@ -78,6 +78,27 @@ function buildDemoCampaigns(userId: string): Database["public"]["Tables"]["campa
       end_date: isoDateFromToday(20),
     },
   ];
+}
+
+export function getLocalDemoCampaigns(): Campaign[] {
+  const now = new Date().toISOString();
+
+  return buildDemoCampaigns("demo-user").map((campaign, index) => ({
+    id: `demo-campaign-${index + 1}`,
+    user_id: "demo-user",
+    name: campaign.name ?? `Demo Campaign ${index + 1}`,
+    platform: campaign.platform ?? "google",
+    status: campaign.status ?? "draft",
+    budget: Number(campaign.budget ?? 0),
+    spent: Number(campaign.spent ?? 0),
+    impressions: Number(campaign.impressions ?? 0),
+    clicks: Number(campaign.clicks ?? 0),
+    conversions: Number(campaign.conversions ?? 0),
+    start_date: campaign.start_date ?? null,
+    end_date: campaign.end_date ?? null,
+    created_at: now,
+    updated_at: now,
+  }));
 }
 
 function buildDemoPayments(userId: string): Database["public"]["Tables"]["payments"]["Insert"][] {
