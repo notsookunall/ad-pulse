@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import type { Campaign, Database, Profile } from "@/lib/database.types";
+import type { Campaign, Database, Message, Payment, Profile } from "@/lib/database.types";
 
 const seededUsers = new Set<string>();
 
@@ -134,6 +134,32 @@ function buildDemoPayments(userId: string): Database["public"]["Tables"]["paymen
   ];
 }
 
+function buildDemoMessages(userId: string, adminId: string) {
+  return [
+    {
+      sender_id: adminId,
+      receiver_id: userId,
+      subject: "Welcome to AdPulse AI",
+      body: "Your dashboard is ready. Review the AI insights card to see how your active campaigns are performing this week.",
+      is_read: true,
+    },
+    {
+      sender_id: userId,
+      receiver_id: adminId,
+      subject: "Landing page improvements",
+      body: "Please review the updated landing page copy before we increase spend on the Summer Sale campaign.",
+      is_read: true,
+    },
+    {
+      sender_id: adminId,
+      receiver_id: userId,
+      subject: "Weekly optimization note",
+      body: "Brand Awareness is delivering strong reach. Consider testing a narrower audience segment to improve conversion efficiency.",
+      is_read: false,
+    },
+  ] satisfies Database["public"]["Tables"]["messages"]["Insert"][];
+}
+
 export async function ensureDemoWorkspace(user: User, profile: Profile | null) {
   if (!user?.id || profile?.role === "admin" || seededUsers.has(user.id)) {
     return;
@@ -179,8 +205,73 @@ export async function ensureDemoWorkspace(user: User, profile: Profile | null) {
         throw paymentInsertError;
       }
     }
+
+    const { count: messageCount, error: messageCountError } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true });
+
+    if (messageCountError) {
+      throw messageCountError;
+    }
+
+    if ((messageCount ?? 0) === 0) {
+      const { data: adminProfileData } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("role", "admin")
+        .limit(1)
+        .maybeSingle();
+
+      const adminProfile = adminProfileData as Pick<Profile, "id"> | null;
+      const adminId = adminProfile?.id ?? user.id;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: messageInsertError } = await (supabase.from("messages") as any).insert(
+        buildDemoMessages(user.id, adminId)
+      );
+
+      if (messageInsertError) {
+        throw messageInsertError;
+      }
+    }
   } catch (error) {
     console.error("Failed to seed demo workspace:", error);
     seededUsers.delete(user.id);
   }
+}
+
+export function getLocalDemoPayments(): Payment[] {
+  const now = new Date().toISOString();
+
+  return buildDemoPayments("demo-user").map((payment, index) => ({
+    id: `demo-payment-${index + 1}`,
+    user_id: "demo-user",
+    amount: Number(payment.amount),
+    status: payment.status ?? "pending",
+    method: payment.method ?? "razorpay",
+    razorpay_payment_id: payment.razorpay_payment_id ?? null,
+    razorpay_order_id: payment.razorpay_order_id ?? null,
+    description: payment.description ?? null,
+    created_at: now,
+  }));
+}
+
+export function getLocalDemoMessages(userId = "demo-user", profileName = "Client User"): Array<Message & {
+  sender_name: string;
+  receiver_name: string;
+}> {
+  const adminId = "demo-admin";
+  const now = new Date();
+
+  return buildDemoMessages(userId, adminId).map((message, index) => ({
+    id: `demo-message-${index + 1}`,
+    sender_id: message.sender_id,
+    receiver_id: message.receiver_id,
+    subject: message.subject,
+    body: message.body,
+    is_read: message.is_read ?? false,
+    created_at: new Date(now.getTime() - index * 86400000).toISOString(),
+    sender_name: message.sender_id === adminId ? "AdPulse Team" : profileName,
+    receiver_name: message.receiver_id === adminId ? "AdPulse Team" : profileName,
+  }));
 }

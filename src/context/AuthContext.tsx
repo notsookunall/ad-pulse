@@ -11,6 +11,7 @@ interface AuthContextValue {
   profile: Profile | null;
   session: Session | null;
   loading: boolean;
+  updateProfile: (updates: Partial<Pick<Profile, "full_name" | "company" | "avatar_url">>) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
@@ -179,6 +180,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   };
 
+  const updateProfile = async (
+    updates: Partial<Pick<Profile, "full_name" | "company" | "avatar_url">>
+  ): Promise<{ error: string | null }> => {
+    if (!user) {
+      return { error: "No active user session." };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("profiles") as any)
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    const refreshedProfile = await fetchProfile(user.id, user);
+    setProfile(refreshedProfile);
+
+    return { error: null };
+  };
+
   const signUp = async (
     email: string,
     password: string,
@@ -233,7 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signOut, signUp }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, updateProfile, signIn, signOut, signUp }}>
       {children}
     </AuthContext.Provider>
   );

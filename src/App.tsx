@@ -14,12 +14,15 @@ import Signup from "./pages/Signup";
 import Overview from "./pages/dashboard/Overview";
 import Campaigns from "./pages/dashboard/Campaigns";
 import Payments from "./pages/dashboard/Payments";
+import Analytics from "./pages/dashboard/Analytics";
+import Messages from "./pages/dashboard/Messages";
+import Settings from "./pages/dashboard/Settings";
 import AdminOverview from "./pages/admin/AdminOverview";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Placeholder for missing pages
+// Placeholder for missing admin pages
 const Placeholder = ({ title }: { title: string }) => (
   <div className="flex items-center justify-center h-[50vh] text-muted-foreground">
     <div className="text-center">
@@ -52,9 +55,9 @@ export default function App() {
                 <Route index element={<Overview />} />
                 <Route path="campaigns" element={<Campaigns />} />
                 <Route path="payments" element={<Payments />} />
-                <Route path="analytics" element={<Placeholder title="Analytics" />} />
-                <Route path="messages" element={<Placeholder title="Messages" />} />
-                <Route path="settings" element={<Placeholder title="Settings" />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="messages" element={<Messages />} />
+                <Route path="settings" element={<Settings />} />
               </Route>
             </Route>
 
