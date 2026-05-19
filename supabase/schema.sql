@@ -69,18 +69,18 @@ alter table public.payments enable row level security;
 alter table public.messages enable row level security;
 
 -- PROFILES policies
+drop policy if exists "Users can view own profile" on public.profiles;
+drop policy if exists "Admins can view all profiles" on public.profiles;
+drop policy if exists "Users can update own profile" on public.profiles;
+drop policy if exists "Enable insert for authenticated users" on public.profiles;
+
 create policy "Users can view own profile"
   on public.profiles for select
   using (auth.uid() = id);
 
 create policy "Admins can view all profiles"
   on public.profiles for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using ((auth.jwt() ->> 'email') = 'admin@adpulse.ai');
 
 create policy "Users can update own profile"
   on public.profiles for update
@@ -91,18 +91,19 @@ create policy "Enable insert for authenticated users"
   with check (auth.uid() = id);
 
 -- CAMPAIGNS policies
+drop policy if exists "Clients can view own campaigns" on public.campaigns;
+drop policy if exists "Admins can view all campaigns" on public.campaigns;
+drop policy if exists "Clients can insert own campaigns" on public.campaigns;
+drop policy if exists "Clients can update own campaigns" on public.campaigns;
+drop policy if exists "Admins can update all campaigns" on public.campaigns;
+
 create policy "Clients can view own campaigns"
   on public.campaigns for select
   using (auth.uid() = user_id);
 
 create policy "Admins can view all campaigns"
   on public.campaigns for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using ((auth.jwt() ->> 'email') = 'admin@adpulse.ai');
 
 create policy "Clients can insert own campaigns"
   on public.campaigns for insert
@@ -114,26 +115,20 @@ create policy "Clients can update own campaigns"
 
 create policy "Admins can update all campaigns"
   on public.campaigns for update
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using ((auth.jwt() ->> 'email') = 'admin@adpulse.ai');
 
 -- PAYMENTS policies
+drop policy if exists "Clients can view own payments" on public.payments;
+drop policy if exists "Admins can view all payments" on public.payments;
+drop policy if exists "Clients can insert own payments" on public.payments;
+
 create policy "Clients can view own payments"
   on public.payments for select
   using (auth.uid() = user_id);
 
 create policy "Admins can view all payments"
   on public.payments for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using ((auth.jwt() ->> 'email') = 'admin@adpulse.ai');
 
 create policy "Clients can insert own payments"
   on public.payments for insert
