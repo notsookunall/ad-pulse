@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { useAdminWorkspace } from "@/hooks/useAdminWorkspace";
 import { enrichCampaign } from "@/lib/campaignInsights";
 import { useEffect, useMemo, useState } from "react";
-import { Filter, Megaphone, Save, Search, TrendingUp, Users } from "lucide-react";
-import type { Campaign } from "@/lib/database.types";
+import { Filter, Megaphone, Plus, Save, Search, TrendingUp, Users } from "lucide-react";
+import type { Campaign, Database } from "@/lib/database.types";
 
 function formatPercent(value: number) {
   return `${value.toFixed(2)}%`;
@@ -17,12 +17,18 @@ function formatCurrency(value: number) {
 }
 
 export default function AdminCampaigns() {
-  const { campaigns, profiles, loading, error, usingDemoData, updateCampaign } = useAdminWorkspace();
+  const { campaigns, profiles, loading, error, usingDemoData, updateCampaign, createCampaign } = useAdminWorkspace();
   const [query, setQuery] = useState("");
   const [clientFilterId, setClientFilterId] = useState("all");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [saveState, setSaveState] = useState<{ error: string | null; success: string | null }>({
+    error: null,
+    success: null,
+  });
+  const [createState, setCreateState] = useState<{ error: string | null; success: string | null }>({
     error: null,
     success: null,
   });
@@ -36,6 +42,13 @@ export default function AdminCampaigns() {
     impressions: "0",
     clicks: "0",
     conversions: "0",
+  });
+  const [createForm, setCreateForm] = useState({
+    userId: "",
+    name: "",
+    platform: "google" as Database["public"]["Tables"]["campaigns"]["Row"]["platform"],
+    budget: "",
+    duration: "30",
   });
 
   const clientProfiles = useMemo(() => profiles.filter((profile) => profile.role === "client"), [profiles]);
@@ -85,6 +98,14 @@ export default function AdminCampaigns() {
     });
     setSaveState({ error: null, success: null });
   }, [selectedCampaign]);
+
+  useEffect(() => {
+    const defaultClientId = clientFilterId !== "all" ? clientFilterId : clientProfiles[0]?.id ?? "";
+    setCreateForm((current) => ({
+      ...current,
+      userId: current.userId || defaultClientId,
+    }));
+  }, [clientFilterId, clientProfiles]);
 
   const runningCount = enrichedCampaigns.filter((campaign) => campaign.status === "running").length;
   const activeClients = new Set(enrichedCampaigns.map((campaign) => campaign.user_id)).size;
@@ -146,6 +167,81 @@ export default function AdminCampaigns() {
     setSaving(false);
   };
 
+  const handleCreateCampaign = async () => {
+    setCreating(true);
+    setCreateState({ error: null, success: null });
+
+    const budget = Number(createForm.budget);
+    const duration = Number(createForm.duration);
+
+    if (!createForm.userId) {
+      setCreateState({ error: "Choose a client for the new campaign.", success: null });
+      setCreating(false);
+      return;
+    }
+
+    if (!createForm.name.trim()) {
+      setCreateState({ error: "Campaign name is required.", success: null });
+      setCreating(false);
+      return;
+    }
+
+    if (!Number.isFinite(budget) || budget < 0) {
+      setCreateState({ error: "Budget must be a valid non-negative number.", success: null });
+      setCreating(false);
+      return;
+    }
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+      setCreateState({ error: "Duration must be at least 1 day.", success: null });
+      setCreating(false);
+      return;
+    }
+
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + duration);
+
+    const { error: createError, campaign: createdCampaign } = await createCampaign({
+      user_id: createForm.userId,
+      name: createForm.name.trim(),
+      platform: createForm.platform,
+      status: "draft",
+      budget,
+      spent: 0,
+      impressions: 0,
+      clicks: 0,
+      conversions: 0,
+      start_date: startDate.toISOString().slice(0, 10),
+      end_date: endDate.toISOString().slice(0, 10),
+    });
+
+    if (createError) {
+      setCreateState({ error: createError, success: null });
+      setCreating(false);
+      return;
+    }
+
+    if (createdCampaign) {
+      setSelectedCampaignId(createdCampaign.id);
+      setClientFilterId(createdCampaign.user_id);
+    }
+
+    setCreateForm({
+      userId: createForm.userId,
+      name: "",
+      platform: "google",
+      budget: "",
+      duration: "30",
+    });
+    setCreateState({
+      error: null,
+      success: usingDemoData ? "Campaign created in demo mode." : "Campaign created successfully.",
+    });
+    setIsCreateOpen(false);
+    setCreating(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -153,7 +249,12 @@ export default function AdminCampaigns() {
           <h2 className="text-2xl font-bold text-foreground">Manage Campaigns</h2>
           <p className="mt-1 text-sm text-muted-foreground">Monitor performance, ownership, and delivery quality for every campaign across the platform.</p>
         </div>
-        {usingDemoData && <Badge variant="secondary">Demo admin data</Badge>}
+        <div className="flex items-center gap-3">
+          {usingDemoData && <Badge variant="secondary">Demo admin data</Badge>}
+          <Button variant="gradient" onClick={() => setIsCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Create Campaign
+          </Button>
+        </div>
       </div>
 
       {error && <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-100">{error}</div>}
@@ -179,6 +280,100 @@ export default function AdminCampaigns() {
           </Card>
         ))}
       </div>
+
+      {isCreateOpen && (
+        <Card className="border-border bg-card">
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-lg font-medium text-foreground">Create Campaign</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">Add a new campaign for any existing client, then manage it from this page.</p>
+            </div>
+            <Button variant="ghost" onClick={() => setIsCreateOpen(false)}>
+              Close
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Client</label>
+                <select
+                  value={createForm.userId}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, userId: event.target.value }))}
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
+                >
+                  <option value="">Select client</option>
+                  {clientProfiles.map((profile) => (
+                    <option key={profile.id} value={profile.id}>
+                      {profile.full_name} {profile.company ? `- ${profile.company}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Platform</label>
+                <select
+                  value={createForm.platform}
+                  onChange={(event) =>
+                    setCreateForm((current) => ({
+                      ...current,
+                      platform: event.target.value as Database["public"]["Tables"]["campaigns"]["Row"]["platform"],
+                    }))
+                  }
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
+                >
+                  {["google", "facebook", "instagram", "linkedin", "twitter"].map((platform) => (
+                    <option key={platform} value={platform}>
+                      {platform}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Campaign Name</label>
+              <Input
+                value={createForm.name}
+                onChange={(event) => setCreateForm((current) => ({ ...current, name: event.target.value }))}
+                placeholder="e.g. Raj Summer Sale 2026"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Budget</label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={createForm.budget}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, budget: event.target.value }))}
+                  placeholder="5000"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Duration (Days)</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={createForm.duration}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, duration: event.target.value }))}
+                  placeholder="30"
+                />
+              </div>
+            </div>
+
+            {createState.error && <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">{createState.error}</div>}
+            {createState.success && <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-200">{createState.success}</div>}
+
+            <div className="flex justify-end">
+              <Button variant="gradient" onClick={handleCreateCampaign} disabled={creating}>
+                <Plus className="mr-2 h-4 w-4" />
+                {creating ? "Creating Campaign..." : "Create Campaign"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-border bg-card">
         <CardContent className="grid grid-cols-1 gap-4 p-6 lg:grid-cols-[0.9fr_1.4fr]">

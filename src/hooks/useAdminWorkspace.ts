@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Campaign, Payment, Profile } from "@/lib/database.types";
+import type { Campaign, Database, Payment, Profile } from "@/lib/database.types";
 import { getLocalDemoCampaigns, getLocalDemoPayments, getLocalDemoProfiles } from "@/lib/demoData";
 
 function getReadableErrorMessage(error: unknown) {
@@ -27,6 +27,9 @@ export interface AdminWorkspaceState {
     campaignId: string,
     updates: Partial<Pick<Campaign, "user_id" | "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
   ) => Promise<{ error: string | null }>;
+  createCampaign: (
+    campaign: Database["public"]["Tables"]["campaigns"]["Insert"]
+  ) => Promise<{ error: string | null; campaign: Campaign | null }>;
   updatePayment: (
     paymentId: string,
     updates: Partial<Pick<Payment, "status" | "method" | "amount" | "description">>
@@ -160,6 +163,45 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     return { error: null };
   };
 
+  const createCampaign = async (campaign: Database["public"]["Tables"]["campaigns"]["Insert"]) => {
+    const now = new Date().toISOString();
+    const localCampaign: Campaign = {
+      id: `admin-campaign-${Date.now()}`,
+      user_id: campaign.user_id,
+      name: campaign.name,
+      platform: campaign.platform ?? "google",
+      status: campaign.status ?? "draft",
+      budget: Number(campaign.budget ?? 0),
+      spent: Number(campaign.spent ?? 0),
+      impressions: Number(campaign.impressions ?? 0),
+      clicks: Number(campaign.clicks ?? 0),
+      conversions: Number(campaign.conversions ?? 0),
+      start_date: campaign.start_date ?? null,
+      end_date: campaign.end_date ?? null,
+      created_at: campaign.created_at ?? now,
+      updated_at: campaign.updated_at ?? now,
+    };
+
+    if (usingDemoData) {
+      setCampaigns((currentCampaigns) => [localCampaign, ...currentCampaigns]);
+      return { error: null, campaign: localCampaign };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error: insertError } = await (supabase.from("campaigns") as any)
+      .insert(campaign)
+      .select()
+      .single();
+
+    if (insertError) {
+      return { error: insertError.message, campaign: null };
+    }
+
+    const insertedCampaign = data as Campaign;
+    setCampaigns((currentCampaigns) => [insertedCampaign, ...currentCampaigns]);
+    return { error: null, campaign: insertedCampaign };
+  };
+
   const updatePayment = async (
     paymentId: string,
     updates: Partial<Pick<Payment, "status" | "method" | "amount" | "description">>
@@ -195,6 +237,7 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     refreshWorkspace,
     updateClientProfile,
     updateCampaign,
+    createCampaign,
     updatePayment,
   };
 }

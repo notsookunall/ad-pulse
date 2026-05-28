@@ -56,8 +56,11 @@ export default function DashboardLayout({ role = "client" }: { role?: "client" |
   const initials = getInitials(profile?.full_name);
 
   const handleLogout = async () => {
-    await signOut();
-    navigate("/login");
+    try {
+      await signOut();
+    } finally {
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
@@ -96,7 +99,8 @@ export default function DashboardLayout({ role = "client" }: { role?: "client" |
         </div>
 
         <div className="p-4 border-t border-border">
-          <button 
+          <button
+            type="button"
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-red-400 hover:bg-red-500/10 w-full transition-colors"
           >
@@ -116,9 +120,17 @@ export default function DashboardLayout({ role = "client" }: { role?: "client" |
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+            <button type="button" className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-red-400 md:hidden"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-border">
               <div className="text-right hidden sm:block">
