@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { useAdminWorkspace } from "@/hooks/useAdminWorkspace";
 import { enrichCampaign } from "@/lib/campaignInsights";
 import { useEffect, useMemo, useState } from "react";
-import { Megaphone, Save, Search, TrendingUp, Users } from "lucide-react";
+import { Filter, Megaphone, Save, Search, TrendingUp, Users } from "lucide-react";
 import type { Campaign } from "@/lib/database.types";
 
 function formatPercent(value: number) {
@@ -61,6 +61,8 @@ export default function AdminCampaigns() {
     () => filteredCampaigns.find((campaign) => campaign.id === selectedCampaignId) ?? filteredCampaigns[0] ?? null,
     [filteredCampaigns, selectedCampaignId]
   );
+  const selectedOwner = selectedCampaign ? profilesById.get(selectedCampaign.user_id) ?? null : null;
+  const assignedClient = form.userId ? profilesById.get(form.userId) ?? null : null;
 
   useEffect(() => {
     if ((!selectedCampaignId || !filteredCampaigns.some((campaign) => campaign.id === selectedCampaignId)) && filteredCampaigns[0]) {
@@ -178,27 +180,42 @@ export default function AdminCampaigns() {
         ))}
       </div>
 
+      <Card className="border-border bg-card">
+        <CardContent className="grid grid-cols-1 gap-4 p-6 lg:grid-cols-[0.9fr_1.4fr]">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Filter className="h-4 w-4 text-primary" />
+              Client workspace filter
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Pick a client to view only their campaigns, or leave it on all clients to reassign ownership across accounts.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Show campaigns for</label>
+            <select
+              value={clientFilterId}
+              onChange={(event) => setClientFilterId(event.target.value)}
+              className="flex h-11 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
+            >
+              <option value="all">All clients</option>
+              {clientProfiles.map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.full_name} {profile.company ? `- ${profile.company}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.25fr_0.95fr]">
         <Card className="bg-card border-border">
           <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-lg font-medium text-foreground">Campaign Portfolio</CardTitle>
-            <div className="flex w-full flex-col gap-3 sm:max-w-md sm:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search campaigns..." className="pl-10" />
-              </div>
-              <select
-                value={clientFilterId}
-                onChange={(event) => setClientFilterId(event.target.value)}
-                className="flex h-10 rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
-              >
-                <option value="all">All clients</option>
-                {clientProfiles.map((profile) => (
-                  <option key={profile.id} value={profile.id}>
-                    {profile.full_name}
-                  </option>
-                ))}
-              </select>
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search campaigns..." className="pl-10" />
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -264,6 +281,12 @@ export default function AdminCampaigns() {
           <CardContent className="space-y-4">
             {selectedCampaign ? (
               <>
+                <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-4 text-sm">
+                  <div className="text-xs uppercase tracking-[0.16em] text-indigo-200/80">Current ownership</div>
+                  <div className="mt-2 text-base font-semibold text-indigo-50">{selectedOwner?.full_name ?? "Unknown client"}</div>
+                  <div className="text-sm text-indigo-100/80">{selectedOwner?.company ?? selectedOwner?.email ?? "No company assigned"}</div>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Assigned Client</label>
                   <select
@@ -280,6 +303,12 @@ export default function AdminCampaigns() {
                   <p className="text-xs text-muted-foreground">
                     Move this campaign to any existing client profile and the admin/client dashboards will reflect the new owner.
                   </p>
+                </div>
+
+                <div className="rounded-xl border border-border bg-background/30 p-4 text-sm">
+                  <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Will be assigned to</div>
+                  <div className="mt-2 text-base font-semibold text-foreground">{assignedClient?.full_name ?? "Select a client"}</div>
+                  <div className="text-sm text-muted-foreground">{assignedClient?.company ?? assignedClient?.email ?? "No company assigned"}</div>
                 </div>
 
                 <div className="space-y-2">
