@@ -19,6 +19,10 @@ export interface AdminWorkspaceState {
   error: string | null;
   usingDemoData: boolean;
   refreshWorkspace: () => Promise<void>;
+  updateClientProfile: (
+    profileId: string,
+    updates: Partial<Pick<Profile, "full_name" | "company" | "role" | "avatar_url">>
+  ) => Promise<{ error: string | null }>;
 }
 
 export function useAdminWorkspace(): AdminWorkspaceState {
@@ -71,6 +75,47 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     void refreshWorkspace();
   }, []);
 
+  const updateClientProfile = async (
+    profileId: string,
+    updates: Partial<Pick<Profile, "full_name" | "company" | "role" | "avatar_url">>
+  ) => {
+    const nextProfileState = (currentProfiles: Profile[]) =>
+      currentProfiles.map((profile) =>
+        profile.id === profileId
+          ? {
+              ...profile,
+              ...updates,
+              company: updates.company ?? profile.company,
+              full_name: updates.full_name ?? profile.full_name,
+              role: updates.role ?? profile.role,
+              avatar_url: updates.avatar_url ?? profile.avatar_url,
+              updated_at: new Date().toISOString(),
+            }
+          : profile
+      );
+
+    if (usingDemoData) {
+      setProfiles((currentProfiles) => nextProfileState(currentProfiles));
+      return { error: null };
+    }
+
+    // Generated types are slightly out of sync for update chaining here.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase.from("profiles") as any)
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", profileId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    setProfiles((currentProfiles) => nextProfileState(currentProfiles));
+    return { error: null };
+  };
+
   return {
     profiles,
     campaigns,
@@ -79,5 +124,6 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     error,
     usingDemoData,
     refreshWorkspace,
+    updateClientProfile,
   };
 }
