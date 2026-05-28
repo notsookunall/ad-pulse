@@ -275,3 +275,50 @@ export function getLocalDemoMessages(userId = "demo-user", profileName = "Client
     receiver_name: message.receiver_id === adminId ? "AdPulse Team" : profileName,
   }));
 }
+
+export function getLocalDemoProfiles(): Profile[] {
+  const now = new Date().toISOString();
+
+  return [
+    {
+      id: "demo-admin",
+      email: "admin@adpulse.ai",
+      full_name: "Admin User",
+      role: "admin",
+      company: "AdPulse AI",
+      avatar_url: null,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: "demo-user",
+      email: "alex@techcorp.com",
+      full_name: "Alex Johnson",
+      role: "client",
+      company: "TechCorp Inc.",
+      avatar_url: null,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: "demo-user-2",
+      email: "maria@stylelane.com",
+      full_name: "Maria Singh",
+      role: "client",
+      company: "StyleLane",
+      avatar_url: null,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: "demo-user-3",
+      email: "rohan@edulift.com",
+      full_name: "Rohan Mehta",
+      role: "client",
+      company: "EduLift",
+      avatar_url: null,
+      created_at: now,
+      updated_at: now,
+    },
+  ];
+}

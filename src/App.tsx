@@ -18,19 +18,14 @@ import Analytics from "./pages/dashboard/Analytics";
 import Messages from "./pages/dashboard/Messages";
 import Settings from "./pages/dashboard/Settings";
 import AdminOverview from "./pages/admin/AdminOverview";
+import AdminClients from "./pages/admin/AdminClients";
+import AdminCampaigns from "./pages/admin/AdminCampaigns";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminReports from "./pages/admin/AdminReports";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-
-// Placeholder for missing admin pages
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="flex items-center justify-center h-[50vh] text-muted-foreground">
-    <div className="text-center">
-      <h2 className="text-2xl font-bold text-foreground mb-2">{title}</h2>
-      <p>This page is under construction.</p>
-    </div>
-  </div>
-);
 
 export default function App() {
   return (
@@ -65,11 +60,11 @@ export default function App() {
             <Route element={<ProtectedRoute requiredRole="admin" />}>
               <Route path="/admin" element={<DashboardLayout role="admin" />}>
                 <Route index element={<AdminOverview />} />
-                <Route path="clients" element={<Placeholder title="Manage Clients" />} />
-                <Route path="campaigns" element={<Placeholder title="Manage Campaigns" />} />
-                <Route path="analytics" element={<Placeholder title="Update Analytics" />} />
-                <Route path="payments" element={<Placeholder title="Payment Monitoring" />} />
-                <Route path="reports" element={<Placeholder title="Reports" />} />
+                <Route path="clients" element={<AdminClients />} />
+                <Route path="campaigns" element={<AdminCampaigns />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="payments" element={<AdminPayments />} />
+                <Route path="reports" element={<AdminReports />} />
               </Route>
             </Route>
           </Routes>

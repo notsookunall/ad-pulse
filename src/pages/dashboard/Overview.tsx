@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -9,7 +9,8 @@ import {
   MousePointerClick,
   Sparkles,
   Target,
-  TrendingUp,
+  Download,
+  History,
 } from "lucide-react";
 import {
   Bar,
@@ -27,6 +28,8 @@ import {
   hasGeminiApiKey,
   type CampaignAnalysis,
 } from "@/lib/campaignInsights";
+import { exportJson } from "@/lib/exporters";
+import { readInsightHistory, saveInsightRun, type StoredInsightRun } from "@/lib/insightHistory";
 
 function formatCurrency(value: number) {
   return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
@@ -64,6 +67,7 @@ export default function Overview() {
   const { campaigns, loading, error, usingDemoData } = useClientCampaigns();
   const [analysis, setAnalysis] = useState<CampaignAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [history, setHistory] = useState<StoredInsightRun[]>([]);
 
   const enrichedCampaigns = campaigns.map(enrichCampaign);
   const sortedCampaigns = [...enrichedCampaigns].sort((a, b) => b.performanceScore - a.performanceScore);
@@ -87,11 +91,23 @@ export default function Overview() {
     clicks: campaign.clicks,
   }));
 
+  useEffect(() => {
+    setHistory(readInsightHistory());
+  }, []);
+
+  const latestHistory = useMemo(() => history.slice(0, 3), [history]);
+
   const handleAnalyze = async () => {
     setAnalyzing(true);
     const nextAnalysis = await analyzeCampaigns(campaigns);
     setAnalysis(nextAnalysis);
+    setHistory(saveInsightRun(nextAnalysis, campaigns));
     setAnalyzing(false);
+  };
+
+  const handleExportLatestInsight = () => {
+    if (!analysis) return;
+    exportJson("adpulse-latest-ai-insight.json", analysis);
   };
 
   return (
@@ -211,7 +227,12 @@ export default function Overview() {
 
                 <div className="flex flex-col gap-2 rounded-xl border border-border bg-background/30 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                   <span>Generated on {formatDate(analysis.generatedAt)}</span>
-                  {analysis.notice && <span>{analysis.notice}</span>}
+                  <div className="flex flex-wrap items-center gap-3">
+                    {analysis.notice && <span>{analysis.notice}</span>}
+                    <Button variant="ghost" size="sm" onClick={handleExportLatestInsight}>
+                      <Download className="mr-2 h-4 w-4" /> Export JSON
+                    </Button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -267,6 +288,42 @@ export default function Overview() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-card border-border">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
+            <History className="h-5 w-5" /> Saved Insight History
+          </CardTitle>
+          <Badge variant="secondary">{history.length} runs saved</Badge>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {latestHistory.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+              Your last few AI analyses will appear here after you run the insight engine.
+            </div>
+          ) : (
+            latestHistory.map((run) => (
+              <div key={run.id} className="rounded-xl border border-border bg-background/30 p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <Badge variant={run.provider === "gemini" ? "success" : "secondary"}>{run.provider}</Badge>
+                  <Badge variant={run.overallHealth === "strong" ? "success" : run.overallHealth === "mixed" ? "warning" : "destructive"}>
+                    {run.overallHealth}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{formatDate(run.createdAt)}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{run.summary}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                  {run.recommendations.map((recommendation) => (
+                    <span key={`${run.id}-${recommendation.campaign}`} className="rounded-full border border-border px-3 py-1 text-foreground">
+                      {recommendation.campaign}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-card border-border">
