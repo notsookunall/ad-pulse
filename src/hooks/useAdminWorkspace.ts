@@ -23,6 +23,14 @@ export interface AdminWorkspaceState {
     profileId: string,
     updates: Partial<Pick<Profile, "full_name" | "company" | "role" | "avatar_url">>
   ) => Promise<{ error: string | null }>;
+  updateCampaign: (
+    campaignId: string,
+    updates: Partial<Pick<Campaign, "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
+  ) => Promise<{ error: string | null }>;
+  updatePayment: (
+    paymentId: string,
+    updates: Partial<Pick<Payment, "status" | "method" | "amount" | "description">>
+  ) => Promise<{ error: string | null }>;
 }
 
 export function useAdminWorkspace(): AdminWorkspaceState {
@@ -116,6 +124,67 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     return { error: null };
   };
 
+  const updateCampaign = async (
+    campaignId: string,
+    updates: Partial<Pick<Campaign, "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
+  ) => {
+    const nextCampaignState = (currentCampaigns: Campaign[]) =>
+      currentCampaigns.map((campaign) =>
+        campaign.id === campaignId
+          ? {
+              ...campaign,
+              ...updates,
+              updated_at: new Date().toISOString(),
+            }
+          : campaign
+      );
+
+    if (usingDemoData) {
+      setCampaigns((currentCampaigns) => nextCampaignState(currentCampaigns));
+      return { error: null };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase.from("campaigns") as any)
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", campaignId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    setCampaigns((currentCampaigns) => nextCampaignState(currentCampaigns));
+    return { error: null };
+  };
+
+  const updatePayment = async (
+    paymentId: string,
+    updates: Partial<Pick<Payment, "status" | "method" | "amount" | "description">>
+  ) => {
+    const nextPaymentState = (currentPayments: Payment[]) =>
+      currentPayments.map((payment) => (payment.id === paymentId ? { ...payment, ...updates } : payment));
+
+    if (usingDemoData) {
+      setPayments((currentPayments) => nextPaymentState(currentPayments));
+      return { error: null };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase.from("payments") as any)
+      .update(updates)
+      .eq("id", paymentId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    setPayments((currentPayments) => nextPaymentState(currentPayments));
+    return { error: null };
+  };
+
   return {
     profiles,
     campaigns,
@@ -125,5 +194,7 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     usingDemoData,
     refreshWorkspace,
     updateClientProfile,
+    updateCampaign,
+    updatePayment,
   };
 }

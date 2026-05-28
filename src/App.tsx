@@ -22,6 +22,7 @@ import AdminClients from "./pages/admin/AdminClients";
 import AdminCampaigns from "./pages/admin/AdminCampaigns";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminPayments from "./pages/admin/AdminPayments";
+import AdminMessages from "./pages/admin/AdminMessages";
 import AdminReports from "./pages/admin/AdminReports";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
@@ -64,6 +65,7 @@ export default function App() {
                 <Route path="campaigns" element={<AdminCampaigns />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="payments" element={<AdminPayments />} />
+                <Route path="messages" element={<AdminMessages />} />
                 <Route path="reports" element={<AdminReports />} />
               </Route>
             </Route>

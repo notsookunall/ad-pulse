@@ -37,6 +37,7 @@ export default function DashboardLayout({ role = "client" }: { role?: "client" |
     { name: "Manage Campaigns", href: "/admin/campaigns", icon: Megaphone },
     { name: "Update Analytics", href: "/admin/analytics", icon: Activity },
     { name: "Payment Monitoring", href: "/admin/payments", icon: CreditCard },
+    { name: "Client Messages", href: "/admin/messages", icon: MessageSquare },
     { name: "Reports", href: "/admin/reports", icon: FileText },
   ];
 
