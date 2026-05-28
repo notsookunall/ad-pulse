@@ -25,7 +25,7 @@ export interface AdminWorkspaceState {
   ) => Promise<{ error: string | null }>;
   updateCampaign: (
     campaignId: string,
-    updates: Partial<Pick<Campaign, "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
+    updates: Partial<Pick<Campaign, "user_id" | "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
   ) => Promise<{ error: string | null }>;
   updatePayment: (
     paymentId: string,
@@ -126,7 +126,7 @@ export function useAdminWorkspace(): AdminWorkspaceState {
 
   const updateCampaign = async (
     campaignId: string,
-    updates: Partial<Pick<Campaign, "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
+    updates: Partial<Pick<Campaign, "user_id" | "name" | "platform" | "status" | "budget" | "spent" | "impressions" | "clicks" | "conversions">>
   ) => {
     const nextCampaignState = (currentCampaigns: Campaign[]) =>
       currentCampaigns.map((campaign) =>

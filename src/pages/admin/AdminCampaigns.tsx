@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { useAdminWorkspace } from "@/hooks/useAdminWorkspace";
 import { enrichCampaign } from "@/lib/campaignInsights";
 import { useEffect, useMemo, useState } from "react";
-import { Megaphone, Save, Search, TrendingUp } from "lucide-react";
+import { Megaphone, Save, Search, TrendingUp, Users } from "lucide-react";
 import type { Campaign } from "@/lib/database.types";
 
 function formatPercent(value: number) {
@@ -19,6 +19,7 @@ function formatCurrency(value: number) {
 export default function AdminCampaigns() {
   const { campaigns, profiles, loading, error, usingDemoData, updateCampaign } = useAdminWorkspace();
   const [query, setQuery] = useState("");
+  const [clientFilterId, setClientFilterId] = useState("all");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveState, setSaveState] = useState<{ error: string | null; success: string | null }>({
@@ -26,6 +27,7 @@ export default function AdminCampaigns() {
     success: null,
   });
   const [form, setForm] = useState({
+    userId: "",
     name: "",
     platform: "google" as Campaign["platform"],
     status: "draft" as Campaign["status"],
@@ -36,20 +38,24 @@ export default function AdminCampaigns() {
     conversions: "0",
   });
 
+  const clientProfiles = useMemo(() => profiles.filter((profile) => profile.role === "client"), [profiles]);
   const profilesById = useMemo(() => new Map(profiles.map((profile) => [profile.id, profile])), [profiles]);
   const enrichedCampaigns = useMemo(() => campaigns.map(enrichCampaign), [campaigns]);
   const filteredCampaigns = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return enrichedCampaigns;
+    const baseCampaigns =
+      clientFilterId === "all" ? enrichedCampaigns : enrichedCampaigns.filter((campaign) => campaign.user_id === clientFilterId);
 
-    return enrichedCampaigns.filter((campaign) => {
+    if (!normalized) return baseCampaigns;
+
+    return baseCampaigns.filter((campaign) => {
       const owner = profilesById.get(campaign.user_id);
       return [campaign.name, campaign.platform, campaign.status, owner?.full_name ?? "", owner?.company ?? ""]
         .join(" ")
         .toLowerCase()
         .includes(normalized);
     });
-  }, [enrichedCampaigns, profilesById, query]);
+  }, [clientFilterId, enrichedCampaigns, profilesById, query]);
 
   const selectedCampaign = useMemo(
     () => filteredCampaigns.find((campaign) => campaign.id === selectedCampaignId) ?? filteredCampaigns[0] ?? null,
@@ -65,6 +71,7 @@ export default function AdminCampaigns() {
   useEffect(() => {
     if (!selectedCampaign) return;
     setForm({
+      userId: selectedCampaign.user_id,
       name: selectedCampaign.name,
       platform: selectedCampaign.platform,
       status: selectedCampaign.status,
@@ -78,6 +85,7 @@ export default function AdminCampaigns() {
   }, [selectedCampaign]);
 
   const runningCount = enrichedCampaigns.filter((campaign) => campaign.status === "running").length;
+  const activeClients = new Set(enrichedCampaigns.map((campaign) => campaign.user_id)).size;
   const averageScore =
     enrichedCampaigns.length > 0
       ? enrichedCampaigns.reduce((sum, campaign) => sum + campaign.performanceScore, 0) / enrichedCampaigns.length
@@ -103,6 +111,12 @@ export default function AdminCampaigns() {
       return;
     }
 
+    if (!form.userId) {
+      setSaveState({ error: "Choose a client before saving this campaign.", success: null });
+      setSaving(false);
+      return;
+    }
+
     if (Object.values(numericFields).some((value) => Number.isNaN(value) || value < 0)) {
       setSaveState({ error: "Delivery values must be valid non-negative numbers.", success: null });
       setSaving(false);
@@ -110,6 +124,7 @@ export default function AdminCampaigns() {
     }
 
     const { error: updateError } = await updateCampaign(selectedCampaign.id, {
+      user_id: form.userId,
       name: form.name.trim(),
       platform: form.platform,
       status: form.status,
@@ -141,10 +156,11 @@ export default function AdminCampaigns() {
 
       {error && <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-100">{error}</div>}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
           { title: "Total Campaigns", value: campaigns.length.toString(), icon: Megaphone, helper: "across all client workspaces" },
           { title: "Running Now", value: runningCount.toString(), icon: TrendingUp, helper: "actively delivering campaigns" },
+          { title: "Active Clients", value: activeClients.toString(), icon: Users, helper: "clients currently assigned campaigns" },
           { title: "Avg. Performance", value: `${Math.round(averageScore)}/100`, icon: TrendingUp, helper: "cross-portfolio health score" },
         ].map((card, index) => (
           <Card key={index} className="bg-card border-border">
@@ -166,9 +182,23 @@ export default function AdminCampaigns() {
         <Card className="bg-card border-border">
           <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-lg font-medium text-foreground">Campaign Portfolio</CardTitle>
-            <div className="relative w-full sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search campaigns..." className="pl-10" />
+            <div className="flex w-full flex-col gap-3 sm:max-w-md sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search campaigns..." className="pl-10" />
+              </div>
+              <select
+                value={clientFilterId}
+                onChange={(event) => setClientFilterId(event.target.value)}
+                className="flex h-10 rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
+              >
+                <option value="all">All clients</option>
+                {clientProfiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.full_name}
+                  </option>
+                ))}
+              </select>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -214,6 +244,13 @@ export default function AdminCampaigns() {
                       </tr>
                     );
                   })}
+                  {filteredCampaigns.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-10 text-center text-sm text-muted-foreground">
+                        No campaigns are assigned to this client yet. Switch to All clients and reassign an existing campaign to them.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -227,6 +264,24 @@ export default function AdminCampaigns() {
           <CardContent className="space-y-4">
             {selectedCampaign ? (
               <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Assigned Client</label>
+                  <select
+                    value={form.userId}
+                    onChange={(event) => setForm((current) => ({ ...current, userId: event.target.value }))}
+                    className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
+                  >
+                    {clientProfiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.full_name} {profile.company ? `- ${profile.company}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    Move this campaign to any existing client profile and the admin/client dashboards will reflect the new owner.
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Campaign Name</label>
                   <Input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
