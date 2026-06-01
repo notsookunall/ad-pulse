@@ -325,9 +325,19 @@ export default function PaymentGateway({ open, amount, description, onOpenChange
                         )}
 
                         {method === "upi" && (
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-200">UPI ID</label>
-                            <Input value={upiId} onChange={(event) => setUpiId(event.target.value)} className="border-white/10 bg-black/20 text-white" />
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-slate-200">UPI ID</label>
+                              <Input value={upiId} onChange={(event) => setUpiId(event.target.value)} className="border-white/10 bg-black/20 text-white" />
+                            </div>
+                            <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                              <img
+                                src="https://res.cloudinary.com/ddxc2jgfb/image/upload/v1780325513/upi_yrg11k.jpg"
+                                alt="UPI QR code for payment"
+                                className="mx-auto max-h-[360px] w-full object-contain"
+                                loading="lazy"
+                              />
+                            </div>
                           </div>
                         )}
 
