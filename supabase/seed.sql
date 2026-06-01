@@ -55,6 +55,6 @@ BEGIN
     (client_id, admin_id, 'Campaign Performance Query', 'Hi, I would like to know the latest performance metrics for my Summer Sale campaign. Could you share the CTR and conversion trends?', false),
     (admin_id, client_id, 'Welcome to AdPulse AI!', 'Welcome aboard, Alex! Your account has been set up. Feel free to create your first campaign from the dashboard. Let us know if you need any help.', true),
     (admin_id, client_id, 'Campaign Approved', 'Your "Brand Awareness" campaign has been reviewed and approved. It is now live across LinkedIn. You can track real-time metrics from your analytics dashboard.', true),
-    (client_id, admin_id, 'Payment Issue', 'My payment for the Social Media Push campaign failed. Could you help me resolve this? I tried using Razorpay but it showed an error.', false);
+    (client_id, admin_id, 'Payment Issue', 'My payment for the Social Media Push campaign failed. Could you help me resolve this? The demo payment screen showed an error.', false);
 
 END $$;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Campaign, Database, Payment, Profile } from "@/lib/database.types";
 import { getLocalDemoCampaigns, getLocalDemoPayments, getLocalDemoProfiles } from "@/lib/demoData";
@@ -44,7 +44,7 @@ export function useAdminWorkspace(): AdminWorkspaceState {
   const [error, setError] = useState<string | null>(null);
   const [usingDemoData, setUsingDemoData] = useState(false);
 
-  const refreshWorkspace = async () => {
+  const refreshWorkspace = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -80,11 +80,32 @@ export function useAdminWorkspace(): AdminWorkspaceState {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     void refreshWorkspace();
-  }, []);
+  }, [refreshWorkspace]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-payment-monitoring")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "payments",
+        },
+        () => {
+          void refreshWorkspace();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [refreshWorkspace]);
 
   const updateClientProfile = async (
     profileId: string,

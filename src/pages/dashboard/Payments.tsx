@@ -1,8 +1,11 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import PaymentGateway from "@/components/PaymentGateway";
 import { useClientPayments } from "@/hooks/useClientPayments";
-import { CheckCircle2, CreditCard, Download, Landmark, Wallet } from "lucide-react";
+import { CheckCircle2, CreditCard, Download, Landmark, Plus, Wallet } from "lucide-react";
+import { useMemo, useState } from "react";
 
 function formatCurrency(value: number) {
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -19,11 +22,15 @@ function formatDate(dateString: string) {
 function paymentLabel(method: string) {
   if (method === "upi") return "UPI";
   if (method === "bank_transfer") return "Bank Transfer";
-  return "Razorpay";
+  return "Card";
 }
 
 export default function Payments() {
-  const { payments, loading, error, usingDemoData } = useClientPayments();
+  const { payments, loading, error, usingDemoData, refreshPayments } = useClientPayments();
+  const [topUpAmount, setTopUpAmount] = useState("250");
+  const [gatewayOpen, setGatewayOpen] = useState(false);
+  const parsedTopUpAmount = useMemo(() => Number(topUpAmount), [topUpAmount]);
+  const canMakePayment = Number.isFinite(parsedTopUpAmount) && parsedTopUpAmount > 0;
 
   const totalCompleted = payments
     .filter((payment) => payment.status === "completed")
@@ -42,7 +49,12 @@ export default function Payments() {
             Monitor campaign payments, pending invoices, and the overall account billing snapshot.
           </p>
         </div>
-        {usingDemoData && <Badge variant="secondary">Demo billing mode</Badge>}
+        <div className="flex items-center gap-3">
+          {usingDemoData && <Badge variant="secondary">Demo billing mode</Badge>}
+          <Button variant="gradient" onClick={() => setGatewayOpen(true)} disabled={!canMakePayment}>
+            <Plus className="mr-2 h-4 w-4" /> Make a Payment
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -84,7 +96,7 @@ export default function Payments() {
 
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-lg text-foreground">Preferred Method</CardTitle>
+            <CardTitle className="text-lg text-foreground">Add Funds</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4 rounded-xl border border-border bg-background/30 p-4">
@@ -93,13 +105,24 @@ export default function Payments() {
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  {payments[0] ? paymentLabel(payments[0].method) : "Razorpay"}
+                  {payments[0] ? paymentLabel(payments[0].method) : "Card"}
                 </p>
                 <p className="text-xs text-muted-foreground">Used for the latest recorded transaction</p>
               </div>
             </div>
-            <Button variant="outline" className="w-full">
-              <Landmark className="mr-2 h-4 w-4" /> Manage Billing Preferences
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Custom amount</label>
+              <Input
+                type="number"
+                min="1"
+                step="1"
+                value={topUpAmount}
+                onChange={(event) => setTopUpAmount(event.target.value)}
+                placeholder="Enter amount"
+              />
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setGatewayOpen(true)} disabled={!canMakePayment}>
+              <Landmark className="mr-2 h-4 w-4" /> Add Balance
             </Button>
           </CardContent>
         </Card>
@@ -176,6 +199,14 @@ export default function Payments() {
           </div>
         </CardContent>
       </Card>
+
+      <PaymentGateway
+        open={gatewayOpen}
+        amount={canMakePayment ? parsedTopUpAmount : 0}
+        description="AdPulse AI account balance top-up"
+        onOpenChange={setGatewayOpen}
+        onSuccess={() => refreshPayments()}
+      />
     </div>
   );
 }

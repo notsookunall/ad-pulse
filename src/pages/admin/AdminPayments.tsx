@@ -19,6 +19,12 @@ function formatDate(dateString: string) {
   });
 }
 
+function paymentMethodLabel(method: Payment["method"]) {
+  if (method === "upi") return "UPI";
+  if (method === "bank_transfer") return "Bank Transfer";
+  return "Card";
+}
+
 export default function AdminPayments() {
   const { profiles, payments, loading, error, usingDemoData, updatePayment } = useAdminWorkspace();
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
@@ -156,7 +162,7 @@ export default function AdminPayments() {
                           <div className="text-xs text-muted-foreground">{owner?.email ?? "No email"}</div>
                         </td>
                         <td className="px-6 py-4 text-foreground">{payment.description ?? "Campaign payment"}</td>
-                        <td className="px-6 py-4 text-foreground">{payment.method}</td>
+                        <td className="px-6 py-4 text-foreground">{paymentMethodLabel(payment.method)}</td>
                         <td className="px-6 py-4 text-foreground">{formatCurrency(payment.amount)}</td>
                         <td className="px-6 py-4">
                           <Badge variant={payment.status === "completed" ? "success" : payment.status === "pending" ? "warning" : "destructive"}>
@@ -208,7 +214,7 @@ export default function AdminPayments() {
                     >
                       {["razorpay", "bank_transfer", "upi"].map((method) => (
                         <option key={method} value={method}>
-                          {method}
+                          {paymentMethodLabel(method as Payment["method"])}
                         </option>
                       ))}
                     </select>

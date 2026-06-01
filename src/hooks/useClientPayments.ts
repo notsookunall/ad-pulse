@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import type { Payment } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
 import { getLocalDemoPayments } from "@/lib/demoData";
@@ -12,12 +13,19 @@ function getReadableErrorMessage(error: unknown) {
 }
 
 export function useClientPayments() {
+  const { user } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usingDemoData, setUsingDemoData] = useState(false);
 
-  const refreshPayments = async () => {
+  const refreshPayments = useCallback(async () => {
+    if (!user) {
+      setPayments([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -48,11 +56,35 @@ export function useClientPayments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     void refreshPayments();
-  }, []);
+  }, [refreshPayments]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`client-payments-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "payments",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          void refreshPayments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [refreshPayments, user]);
 
   return {
     payments,
