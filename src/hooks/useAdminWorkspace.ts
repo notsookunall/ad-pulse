@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import type { Campaign, Database, Payment, Profile } from "@/lib/database.types";
 import { getLocalDemoCampaigns, getLocalDemoPayments, getLocalDemoProfiles } from "@/lib/demoData";
 
+const LIVE_QUERY_TIMEOUT_MS = 15000;
+
 function getReadableErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error && "message" in error && typeof (error as { message?: unknown }).message === "string") {
@@ -56,7 +58,7 @@ export function useAdminWorkspace(): AdminWorkspaceState {
       ]);
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Admin workspace query timed out after 5 seconds.")), 5000);
+        setTimeout(() => reject(new Error("Admin workspace query timed out after 15 seconds.")), LIVE_QUERY_TIMEOUT_MS);
       });
 
       const [profilesRes, campaignsRes, paymentsRes] = await Promise.race([workspacePromise, timeoutPromise]);

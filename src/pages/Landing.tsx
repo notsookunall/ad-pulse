@@ -3,6 +3,7 @@ import { BarChart3, Globe, Layers, ShieldCheck, Zap, LineChart, Target, Bot } fr
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { AnimatedHero } from "@/components/ui/animated-hero";
+import { SolarSystemBackground } from "@/components/ui/SolarSystemBackground";
 
 export default function Landing() {
   return (
@@ -14,6 +15,9 @@ export default function Landing() {
         ======================================================================== 
       */}
       <section className="relative pt-32 pb-40 overflow-hidden">
+        {/* Animated Solar System / Orbit Node background */}
+        <SolarSystemBackground />
+
         {/* Background Effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 blur-[100px] rounded-[100%]" />
@@ -116,7 +120,13 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
             
             {/* Large Card spanning 2 cols */}
-            <div className="md:col-span-2 relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-indigo-500/30 transition-colors">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+              className="md:col-span-2 relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-indigo-500/30 transition-colors"
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <Layers className="w-10 h-10 text-indigo-400 mb-6 relative z-10" />
               <h4 className="text-2xl font-medium text-white mb-3 relative z-10">Cross-Platform Sync</h4>
@@ -125,34 +135,52 @@ export default function Landing() {
               </p>
               {/* Decorative Element */}
               <div className="absolute right-0 bottom-0 top-0 w-1/2 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiM0NjY0RTEiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9zdmc+')] [mask-image:linear-gradient(to_left,black,transparent)] opacity-50" />
-            </div>
+            </motion.div>
 
             {/* Standard Card */}
-            <div className="relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-pink-500/30 transition-colors">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-pink-500/30 transition-colors"
+            >
               <ShieldCheck className="w-10 h-10 text-pink-400 mb-6" />
               <h4 className="text-xl font-medium text-white mb-2">Total Transparency</h4>
               <p className="text-slate-400 text-sm leading-relaxed">
                 Give your clients a stunning dedicated portal to view live ROI, cutting out endless email threads.
               </p>
-            </div>
+            </motion.div>
 
             {/* Standard Card */}
-            <div className="relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-purple-500/30 transition-colors">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-purple-500/30 transition-colors"
+            >
               <Zap className="w-10 h-10 text-purple-400 mb-6" />
               <h4 className="text-xl font-medium text-white mb-2">Real-Time Data</h4>
               <p className="text-slate-400 text-sm leading-relaxed">
                 Powered by Supabase edge networking, data updates identically on your screen and your client's screen simultaneously.
               </p>
-            </div>
+            </motion.div>
 
             {/* Spanning Bottom Card */}
-            <div className="md:col-span-2 relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-emerald-500/30 transition-colors flex flex-col justify-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="md:col-span-2 relative group rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 overflow-hidden hover:border-emerald-500/30 transition-colors flex flex-col justify-center"
+            >
               <Globe className="w-10 h-10 text-emerald-400 mb-6" />
               <h4 className="text-2xl font-medium text-white mb-3">Global Invoicing Engine</h4>
               <p className="text-slate-400 text-sm max-w-lg leading-relaxed">
                 Securely process massive advertising budgets via built-in payment endpoints. Keep digital ledgers perfectly intact with our centralized accounting features.
               </p>
-            </div>
+            </motion.div>
 
           </div>
         </div>
@@ -179,7 +207,14 @@ export default function Landing() {
               { step: "3", title: "Automate", desc: "Let our AI adjust bidding parameters while you sleep." },
               { step: "4", title: "Bill", desc: "Automatically invoice clients based on real platform spend." }
             ].map((item, i) => (
-              <div key={i} className="relative text-center flex flex-col items-center group">
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="relative text-center flex flex-col items-center group"
+              >
                 <div className="w-[88px] h-[88px] rounded-full bg-[#030712] border border-white/10 flex items-center justify-center mb-6 group-hover:border-indigo-500/50 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.2)] transition-all duration-300 relative z-10">
                   <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-xl font-bold text-indigo-400 font-display">
                     {item.step}
@@ -187,7 +222,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-xl font-medium text-white mb-3">{item.title}</h3>
                 <p className="text-sm text-slate-400 max-w-[200px] mx-auto leading-relaxed">{item.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -201,7 +236,13 @@ export default function Landing() {
       <section className="py-40 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/40 via-[#030712] to-[#030712] -z-10" />
         
-        <div className="max-w-4xl mx-auto px-4 text-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.96 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto px-4 text-center"
+        >
           <LineChart className="w-16 h-16 text-indigo-400 mx-auto mb-8 animate-bounce tracking-widest" style={{ animationDuration: '3s' }} />
           <h2 className="text-5xl md:text-7xl font-display font-medium text-white mb-8 tracking-tight leading-[1.1]">
             Stop managing.<br/>Start scaling.
@@ -216,7 +257,7 @@ export default function Landing() {
               </Button>
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Footer minimal */}

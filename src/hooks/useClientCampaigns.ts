@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import type { Campaign } from "@/lib/database.types";
 import { getLocalDemoCampaigns } from "@/lib/demoData";
 
+const LIVE_QUERY_TIMEOUT_MS = 15000;
+
 function getReadableErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
@@ -40,10 +42,10 @@ export function useClientCampaigns() {
         setTimeout(() => {
           reject(
             new Error(
-              "Campaign query timed out after 5 seconds. This usually means a Supabase RLS policy issue."
+              "Campaign query timed out after 15 seconds. Check your Supabase connection, auth session, and RLS policies."
             )
           );
-        }, 5000);
+        }, LIVE_QUERY_TIMEOUT_MS);
       });
 
       const { data, error: campaignsError } = await Promise.race([

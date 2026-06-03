@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import type { Message, Profile } from "@/lib/database.types";
 import { getLocalDemoMessages, getLocalDemoProfiles } from "@/lib/demoData";
 
+const LIVE_QUERY_TIMEOUT_MS = 15000;
+
 export interface AdminMessage extends Message {
   sender_name: string;
   receiver_name: string;
@@ -35,7 +37,7 @@ export function useAdminMessages() {
       ]);
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Admin messages query timed out after 5 seconds.")), 5000);
+        setTimeout(() => reject(new Error("Admin messages query timed out after 15 seconds.")), LIVE_QUERY_TIMEOUT_MS);
       });
 
       const [messagesRes, profilesRes] = await Promise.race([fetchPromise, timeoutPromise]);

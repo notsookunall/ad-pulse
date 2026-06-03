@@ -1,74 +1,22 @@
 -- ============================================================
--- AdPulse AI — Supabase Database Schema
--- Run this SQL in your Supabase SQL Editor (supabase.com > SQL Editor)
+-- AdPulse AI - Supabase RLS Security Fix
+-- ============================================================
+-- Run this in Supabase Dashboard > SQL Editor if Advisor reports:
+-- "Policy Exists RLS Disabled" or "Table publicly accessible".
+--
+-- This enables Row Level Security on the app tables and adds the
+-- policies needed by the client/admin dashboards.
 -- ============================================================
 
--- 1. PROFILES TABLE (extends Supabase auth.users)
--- We use a separate "profiles" table rather than modifying auth.users directly
-create table if not exists public.profiles (
-  id uuid references auth.users(id) on delete cascade primary key,
-  email text not null,
-  full_name text not null,
-  role text not null default 'client' check (role in ('admin', 'client')),
-  company text,
-  avatar_url text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
+begin;
 
--- 2. CAMPAIGNS TABLE
-create table if not exists public.campaigns (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.profiles(id) on delete cascade not null,
-  name text not null,
-  platform text not null default 'google' check (platform in ('google', 'facebook', 'instagram', 'linkedin', 'twitter')),
-  status text not null default 'draft' check (status in ('draft', 'pending', 'running', 'paused', 'completed')),
-  budget numeric(12, 2) default 0,
-  spent numeric(12, 2) default 0,
-  impressions integer default 0,
-  clicks integer default 0,
-  conversions integer default 0,
-  start_date date,
-  end_date date,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- 3. PAYMENTS TABLE
-create table if not exists public.payments (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.profiles(id) on delete cascade not null,
-  amount numeric(12, 2) not null,
-  status text not null default 'pending' check (status in ('pending', 'completed', 'failed', 'refunded')),
-  method text not null default 'razorpay' check (method in ('razorpay', 'bank_transfer', 'upi')),
-  razorpay_payment_id text,
-  razorpay_order_id text,
-  description text,
-  created_at timestamptz default now()
-);
-
--- 4. MESSAGES TABLE
-create table if not exists public.messages (
-  id uuid default gen_random_uuid() primary key,
-  sender_id uuid references public.profiles(id) on delete cascade not null,
-  receiver_id uuid references public.profiles(id) on delete cascade not null,
-  subject text not null,
-  body text not null,
-  is_read boolean default false,
-  created_at timestamptz default now()
-);
-
--- ============================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
--- ============================================================
-
--- Enable RLS on all tables
+-- 1. Enable Row Level Security on every public app table.
 alter table public.profiles enable row level security;
 alter table public.campaigns enable row level security;
 alter table public.payments enable row level security;
 alter table public.messages enable row level security;
 
--- PROFILES policies
+-- 2. Profiles policies.
 drop policy if exists "Users can view own profile" on public.profiles;
 drop policy if exists "Admins can view all profiles" on public.profiles;
 drop policy if exists "Users can view admin profile" on public.profiles;
@@ -100,7 +48,7 @@ create policy "Enable insert for authenticated users"
   on public.profiles for insert
   with check (auth.uid() = id);
 
--- CAMPAIGNS policies
+-- 3. Campaign policies.
 drop policy if exists "Clients can view own campaigns" on public.campaigns;
 drop policy if exists "Admins can view all campaigns" on public.campaigns;
 drop policy if exists "Clients can insert own campaigns" on public.campaigns;
@@ -132,7 +80,7 @@ create policy "Admins can update all campaigns"
   on public.campaigns for update
   using ((auth.jwt() ->> 'email') = 'admin@adpulse.ai');
 
--- PAYMENTS policies
+-- 4. Payment policies.
 drop policy if exists "Clients can view own payments" on public.payments;
 drop policy if exists "Admins can view all payments" on public.payments;
 drop policy if exists "Clients can insert own payments" on public.payments;
@@ -154,7 +102,7 @@ create policy "Admins can update all payments"
   on public.payments for update
   using ((auth.jwt() ->> 'email') = 'admin@adpulse.ai');
 
--- MESSAGES policies
+-- 5. Message policies.
 drop policy if exists "Users can view own messages" on public.messages;
 drop policy if exists "Admins can view all messages" on public.messages;
 drop policy if exists "Users can send messages" on public.messages;
@@ -176,45 +124,14 @@ create policy "Receivers can mark messages as read"
   on public.messages for update
   using (auth.uid() = receiver_id);
 
--- ============================================================
--- AUTO-UPDATE TRIGGER for updated_at
--- ============================================================
+commit;
 
-create or replace function public.handle_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
-create trigger set_updated_at_profiles
-  before update on public.profiles
-  for each row execute function public.handle_updated_at();
-
-create trigger set_updated_at_campaigns
-  before update on public.campaigns
-  for each row execute function public.handle_updated_at();
-
--- ============================================================
--- AUTO-CREATE PROFILE ON SIGNUP
--- This trigger creates a profile row when a user signs up
--- ============================================================
-
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, email, full_name, role)
-  values (
-    new.id,
-    new.email,
-    coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
-    coalesce(new.raw_user_meta_data->>'role', 'client')
-  );
-  return new;
-end;
-$$ language plpgsql security definer;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
+-- Optional verification query. Run this after the transaction above.
+select
+  schemaname,
+  tablename,
+  rowsecurity
+from pg_tables
+where schemaname = 'public'
+  and tablename in ('profiles', 'campaigns', 'payments', 'messages')
+order by tablename;

@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { getLocalDemoMessages } from "@/lib/demoData";
 import type { Message, Profile } from "@/lib/database.types";
 
+const LIVE_QUERY_TIMEOUT_MS = 15000;
+
 export interface ClientMessage extends Message {
   sender_name: string;
   receiver_name: string;
@@ -40,7 +42,7 @@ export function useClientMessages(userId?: string, profileName?: string) {
         .order("created_at", { ascending: false });
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Messages query timed out after 5 seconds.")), 5000);
+        setTimeout(() => reject(new Error("Messages query timed out after 15 seconds.")), LIVE_QUERY_TIMEOUT_MS);
       });
 
       const { data, error: messagesError } = await Promise.race([messagesPromise, timeoutPromise]);

@@ -4,6 +4,8 @@ import type { Payment } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
 import { getLocalDemoPayments } from "@/lib/demoData";
 
+const LIVE_QUERY_TIMEOUT_MS = 15000;
+
 function getReadableErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error && "message" in error && typeof (error as { message?: unknown }).message === "string") {
@@ -36,7 +38,7 @@ export function useClientPayments() {
         .order("created_at", { ascending: false });
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Payments query timed out after 5 seconds.")), 5000);
+        setTimeout(() => reject(new Error("Payments query timed out after 15 seconds.")), LIVE_QUERY_TIMEOUT_MS);
       });
 
       const { data, error: paymentsError } = await Promise.race([paymentsPromise, timeoutPromise]);
