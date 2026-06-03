@@ -11,7 +11,7 @@ export default function MainLayout() {
 
   const navLinks = [
     { name: "Features", href: "/#features" },
-    { name: "Services", href: "/#services" },
+    { name: "Services", href: "/services" },
     { name: "Pricing", href: "/pricing" },
     { name: "About", href: "/about" },
   ];

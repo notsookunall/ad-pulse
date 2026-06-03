@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Landing from "./pages/Landing";
 import About from "./pages/About";
 import Pricing from "./pages/Pricing";
+import Services from "./pages/Services";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Overview from "./pages/dashboard/Overview";
@@ -39,6 +40,7 @@ export default function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/about" element={<About />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/services" element={<Services />} />
             </Route>
 
             {/* Auth Routes */}
