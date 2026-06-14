@@ -310,7 +310,7 @@ export default function Services() {
             Ready to supercharge your ads?
           </h2>
           <p className="text-xl text-slate-400 mb-10">
-            Join thousands of agencies already using AdPulse AI to deliver extraordinary results for their clients.
+            Join thousands of agencies already using AdPulse to deliver extraordinary results for their clients.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/signup">

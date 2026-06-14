@@ -139,7 +139,7 @@ function buildDemoMessages(userId: string, adminId: string) {
     {
       sender_id: adminId,
       receiver_id: userId,
-      subject: "Welcome to AdPulse AI",
+      subject: "Welcome to AdPulse",
       body: "Your dashboard is ready. Review the AI insights card to see how your active campaigns are performing this week.",
       is_read: true,
     },
@@ -168,71 +168,63 @@ export async function ensureDemoWorkspace(user: User, profile: Profile | null) {
   seededUsers.add(user.id);
 
   try {
-    const { count: campaignCount, error: campaignCountError } = await supabase
-      .from("campaigns")
-      .select("id", { count: "exact", head: true });
+    // Run all 3 count checks in parallel instead of sequentially
+    const [campaignsRes, paymentsRes, messagesRes] = await Promise.all([
+      supabase.from("campaigns").select("id", { count: "exact", head: true }),
+      supabase.from("payments").select("id", { count: "exact", head: true }),
+      supabase.from("messages").select("id", { count: "exact", head: true }),
+    ]);
 
-    if (campaignCountError) {
-      throw campaignCountError;
-    }
+    if (campaignsRes.error) throw campaignsRes.error;
+    if (paymentsRes.error) throw paymentsRes.error;
+    if (messagesRes.error) throw messagesRes.error;
 
-    if ((campaignCount ?? 0) === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: campaignInsertError } = await (supabase.from("campaigns") as any).insert(
-        buildDemoCampaigns(user.id)
+    // Run all needed inserts in parallel
+    const insertPromises: Promise<void>[] = [];
+
+    if ((campaignsRes.count ?? 0) === 0) {
+      insertPromises.push(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from("campaigns") as any).insert(buildDemoCampaigns(user.id)).then(({ error }: { error: unknown }) => {
+          if (error) throw error;
+        })
       );
-
-      if (campaignInsertError) {
-        throw campaignInsertError;
-      }
     }
 
-    const { count: paymentCount, error: paymentCountError } = await supabase
-      .from("payments")
-      .select("id", { count: "exact", head: true });
-
-    if (paymentCountError) {
-      throw paymentCountError;
-    }
-
-    if ((paymentCount ?? 0) === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: paymentInsertError } = await (supabase.from("payments") as any).insert(
-        buildDemoPayments(user.id)
+    if ((paymentsRes.count ?? 0) === 0) {
+      insertPromises.push(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from("payments") as any).insert(buildDemoPayments(user.id)).then(({ error }: { error: unknown }) => {
+          if (error) throw error;
+        })
       );
-
-      if (paymentInsertError) {
-        throw paymentInsertError;
-      }
     }
 
-    const { count: messageCount, error: messageCountError } = await supabase
-      .from("messages")
-      .select("id", { count: "exact", head: true });
+    if ((messagesRes.count ?? 0) === 0) {
+      insertPromises.push(
+        (async () => {
+          const { data: adminProfileData } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("role", "admin")
+            .limit(1)
+            .maybeSingle();
 
-    if (messageCountError) {
-      throw messageCountError;
-    }
+          const adminProfile = adminProfileData as Pick<Profile, "id"> | null;
+          const adminId = adminProfile?.id ?? user.id;
 
-    if ((messageCount ?? 0) === 0) {
-      const { data: adminProfileData } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("role", "admin")
-        .limit(1)
-        .maybeSingle();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { error: messageInsertError } = await (supabase.from("messages") as any).insert(
+            buildDemoMessages(user.id, adminId)
+          );
 
-      const adminProfile = adminProfileData as Pick<Profile, "id"> | null;
-      const adminId = adminProfile?.id ?? user.id;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: messageInsertError } = await (supabase.from("messages") as any).insert(
-        buildDemoMessages(user.id, adminId)
+          if (messageInsertError) throw messageInsertError;
+        })()
       );
+    }
 
-      if (messageInsertError) {
-        throw messageInsertError;
-      }
+    if (insertPromises.length > 0) {
+      await Promise.all(insertPromises);
     }
   } catch (error) {
     console.error("Failed to seed demo workspace:", error);
@@ -285,7 +277,7 @@ export function getLocalDemoProfiles(): Profile[] {
       email: "admin@adpulse.ai",
       full_name: "Admin User",
       role: "admin",
-      company: "AdPulse AI",
+      company: "AdPulse",
       avatar_url: null,
       created_at: now,
       updated_at: now,

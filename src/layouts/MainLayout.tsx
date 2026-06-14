@@ -26,7 +26,7 @@ export default function MainLayout() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white fill-white" />
                 </div>
-                <span className="font-display font-bold text-xl tracking-tight text-foreground">AdPulse AI</span>
+                <span className="font-display font-bold text-xl tracking-tight text-foreground">AdPulse</span>
               </Link>
             </div>
             
@@ -105,7 +105,7 @@ export default function MainLayout() {
                 <div className="w-6 h-6 rounded bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center">
                   <Zap className="w-3 h-3 text-white fill-white" />
                 </div>
-                <span className="font-display font-bold text-lg text-foreground">AdPulse AI</span>
+                <span className="font-display font-bold text-lg text-foreground">AdPulse</span>
               </Link>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Automating digital advertising with the power of artificial intelligence. Scale your campaigns effortlessly.
@@ -140,7 +140,7 @@ export default function MainLayout() {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
-            <p className="text-muted-foreground text-sm">© 2026 AdPulse AI. All rights reserved.</p>
+            <p className="text-muted-foreground text-sm">© 2026 AdPulse. All rights reserved.</p>
           </div>
         </div>
       </footer>

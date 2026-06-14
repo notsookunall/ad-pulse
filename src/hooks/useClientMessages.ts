@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { getLocalDemoMessages } from "@/lib/demoData";
 import type { Message, Profile } from "@/lib/database.types";
 
-const LIVE_QUERY_TIMEOUT_MS = 15000;
+const LIVE_QUERY_TIMEOUT_MS = 4000;
 
 export interface ClientMessage extends Message {
   sender_name: string;

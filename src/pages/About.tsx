@@ -27,14 +27,14 @@ export default function About() {
             Project Deep Dive
           </div>
           <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-white mb-6">
-            About <span className="text-gradient">AdPulse AI</span>
+            About <span className="text-gradient">AdPulse</span>
           </h1>
           <p className="text-xl text-slate-400 leading-relaxed mb-8">
             An advanced AI-Powered Digital Advertising Management System with a dedicated Client Dashboard, designed to revolutionize transparency and efficiency in digital marketing.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a 
-              href="https://docs.google.com/document/d/1eCFVudcFL9r9m9viLJsv28kBb54zxWyz/edit?usp=sharing&ouid=113583490983605706815&rtpof=true&sd=true" 
+              href="https://docs.google.com/document/d/1N2-UJg9MHsI3CAlWCzb8WpceSDd0_Xbt/edit?usp=drive_link&ouid=113583490983605706815&rtpof=true&sd=true" 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-full sm:w-auto"
@@ -86,7 +86,7 @@ export default function About() {
             >
               <h2 className="text-3xl font-display font-bold text-white mb-6">The AdPulse Solution</h2>
               <p className="text-slate-400 leading-relaxed mb-6">
-                <strong className="text-white">AdPulse AI</strong> bridges the transparency gap. By centralizing campaign management and leveraging an intuitive Client Dashboard, we eliminate the black box of digital advertising.
+                <strong className="text-white">AdPulse</strong> bridges the transparency gap. By centralizing campaign management and leveraging an intuitive Client Dashboard, we eliminate the black box of digital advertising.
               </p>
               <ul className="space-y-4">
                 {[
@@ -159,7 +159,7 @@ export default function About() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">Dual-Dashboard Architecture</h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              The true power of AdPulse AI lies in its dual-facing interface, securely separating the administrative overarching control from the client's live transparent view.
+              The true power of AdPulse lies in its dual-facing interface, securely separating the administrative overarching control from the client's live transparent view.
             </p>
           </div>
 

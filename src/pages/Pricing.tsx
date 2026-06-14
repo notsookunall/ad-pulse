@@ -125,7 +125,7 @@ export default function Pricing() {
         <PaymentGateway
           open={Boolean(selectedPlan)}
           amount={selectedPlan.price}
-          description={`AdPulse AI ${selectedPlan.name} plan - monthly subscription`}
+          description={`AdPulse ${selectedPlan.name} plan - monthly subscription`}
           onOpenChange={(nextOpen) => {
             if (!nextOpen) setSelectedPlan(null);
           }}

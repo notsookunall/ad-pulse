@@ -4,7 +4,7 @@ import type { Payment } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
 import { getLocalDemoPayments } from "@/lib/demoData";
 
-const LIVE_QUERY_TIMEOUT_MS = 15000;
+const LIVE_QUERY_TIMEOUT_MS = 4000;
 
 function getReadableErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;

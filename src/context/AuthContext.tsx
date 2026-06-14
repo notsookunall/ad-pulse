@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { Profile } from "@/lib/database.types";
@@ -29,11 +29,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Track when signIn() has already populated state so onAuthStateChange
+  // doesn't duplicate the expensive fetchProfile + ensureDemoWorkspace chain.
+  const signInHandledRef = useRef(false);
+
   // Fetch the profile row from the `profiles` table.
   // If no row exists (e.g. first login after signup), auto-create it.
   // If RLS causes an error, fall back to auth metadata so the app still works.
   const fetchProfile = async (userId: string, authUser?: User): Promise<Profile | null> => {
-    // Implement a 5-second timeout to prevent infinite UI spins if Supabase RLS causes infinite loops
+    // Implement a 3-second timeout to prevent infinite UI spins if Supabase RLS causes infinite loops
     const fetchPromise = supabase
       .from("profiles")
       .select("*")
@@ -41,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single();
 
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("Supabase query timed out (likely an RLS infinite recursion issue).")), 5000);
+      setTimeout(() => reject(new Error("Supabase query timed out (likely an RLS infinite recursion issue).")), 3000);
     });
 
     let data, error;
@@ -119,8 +123,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (currentSession?.user) {
         const prof = await fetchProfile(currentSession.user.id, currentSession.user);
-        await ensureDemoWorkspace(currentSession.user, prof);
         if (mounted) setProfile(prof);
+        // Seed demo data in the background — don't block the UI
+        ensureDemoWorkspace(currentSession.user, prof).catch(() => {});
       }
       setLoading(false);
     };
@@ -130,13 +135,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
         if (!mounted) return;
+
+        // If signIn() already handled this auth event, skip the duplicate work
+        if (signInHandledRef.current) {
+          signInHandledRef.current = false;
+          return;
+        }
+
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
         if (newSession?.user) {
           const prof = await fetchProfile(newSession.user.id, newSession.user);
-          await ensureDemoWorkspace(newSession.user, prof);
           if (mounted) setProfile(prof);
+          // Seed demo data in the background — don't block the UI
+          ensureDemoWorkspace(newSession.user, prof).catch(() => {});
         } else {
           setProfile(null);
         }
@@ -161,13 +174,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // navigate() is called and bounces the user back to /login before
     // onAuthStateChange has a chance to fire.
     if (data.user && data.session) {
+      // Mark that we're handling this ourselves so onAuthStateChange skips its duplicate chain
+      signInHandledRef.current = true;
       setUser(data.user);
       setSession(data.session);
-      setLoading(true); // onAuthStateChange will set this to false after profile fetch
       const prof = await fetchProfile(data.user.id, data.user);
-      await ensureDemoWorkspace(data.user, prof);
       setProfile(prof);
       setLoading(false);
+      // Seed demo data in the background — don't block navigation
+      ensureDemoWorkspace(data.user, prof).catch(() => {});
     }
 
     return { error: null };

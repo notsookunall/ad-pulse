@@ -11,4 +11,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,       // cache session in localStorage (avoids cold auth round-trips)
+    autoRefreshToken: true,     // silently refresh tokens before they expire
+    detectSessionInUrl: true,   // handle OAuth redirects
+  },
+  global: {
+    headers: {
+      'x-application-name': 'adpulse-ai',  // helps Supabase route/prioritize requests
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+});

@@ -79,7 +79,7 @@ export default function Login() {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
                 <Zap className="w-5 h-5 text-white fill-white" />
               </div>
-              <span className="text-xl font-display font-bold text-white tracking-tight">AdPulse AI</span>
+              <span className="text-xl font-display font-bold text-white tracking-tight">AdPulse</span>
             </div>
 
             <h2 className="text-4xl font-display font-bold text-white leading-tight mb-4">
@@ -147,7 +147,7 @@ export default function Login() {
             <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30">
               <Zap className="w-6 h-6 text-white fill-white" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-white">AdPulse AI</h1>
+            <h1 className="text-2xl font-display font-bold text-white">AdPulse</h1>
           </div>
 
           <Card className="w-full glass-card border-white/10 shadow-2xl bg-white/[0.02] backdrop-blur-xl">

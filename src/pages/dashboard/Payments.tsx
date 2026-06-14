@@ -203,7 +203,7 @@ export default function Payments() {
       <PaymentGateway
         open={gatewayOpen}
         amount={canMakePayment ? parsedTopUpAmount : 0}
-        description="AdPulse AI account balance top-up"
+        description="AdPulse account balance top-up"
         onOpenChange={setGatewayOpen}
         onSuccess={() => refreshPayments()}
       />
